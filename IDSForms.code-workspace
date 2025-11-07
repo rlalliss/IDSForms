@@ -1,0 +1,128 @@
+{
+    "folders": [
+        {
+            "name": "server",
+            "path": "server"
+        },
+        {
+            "name": "ui",
+            "path": "ui"
+        }
+    ],
+    "settings": {},
+    "tasks": {
+        "version": "2.0.0",
+        "tasks": [
+            {
+                "label": "server:watch",
+                "type": "process",
+                "command": "dotnet",
+                "args": [
+                    "watch",
+                    "run"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:server}",
+                    "env": {
+                        "ASPNETCORE_URLS": "http://localhost:5000",
+                        "DOTNET_WATCH_SUPPRESS_EMOJIS": "1"
+                    }
+                },
+                "isBackground": true,
+                "problemMatcher": {
+                    "owner": "dotnet",
+                    "fileLocation": [
+                        "auto",
+                        "${workspaceFolder:server}"
+                    ],
+                    "pattern": [
+                        {
+                            "regexp": "^([^:]+):(\\d+):(\\d+):\\s+(.*)$",
+                            "file": 1,
+                            "line": 2,
+                            "column": 3,
+                            "message": 4
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": "^dotnet watch",
+                        "endsPattern": "Now listening on:\\s+http://localhost:5000"
+                    }
+                }
+            },
+            {
+                "label": "ui:dev",
+                "type": "process",
+                "command": "npm",
+                "args": [
+                    "run",
+                    "dev"
+                ],
+                "options": {
+                    "cwd": "${workspaceFolder:ui}"
+                },
+                "isBackground": true,
+                "problemMatcher": [
+                    {
+                        "owner": "vite",
+                        "fileLocation": [
+                            "autodetect",
+                            "${workspaceFolder:ui}"
+                        ],
+                        "pattern": [
+                            {
+                                "regexp": "^([^:]+):(\\d+):(\\d+):\\s+(.*)$",
+                                "file": 1,
+                                "line": 2,
+                                "column": 3,
+                                "message": 4
+                            }
+                        ],
+                        "background": {
+                            "activeOnStart": true,
+                            "beginsPattern": "vite v\\d+",
+                            "endsPattern": "Local:\\s*http://localhost:5173"
+                        }
+                    }
+                ]
+            }
+        ]
+    },
+    "launch": {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "Server (.NET)",
+                "type": "coreclr",
+                "request": "launch",
+                "preLaunchTask": "server:watch",
+                "program": "${workspaceFolder:server}/bin/Debug/net8.0/server.dll",
+                "cwd": "${workspaceFolder:server}",
+                "env": {
+                    "ASPNETCORE_URLS": "http://localhost:5000"
+                },
+                "console": "integratedTerminal",
+                "stopAtEntry": false
+            },
+            {
+                "name": "UI (Chrome)",
+                "type": "pwa-chrome",
+                "request": "launch",
+                "url": "http://localhost:5173/login",
+                "webRoot": "${workspaceFolder:ui}",
+                "preLaunchTask": "ui:dev"
+            }
+        ],
+        "compounds": [
+            {
+                "name": "Debug Full Stack",
+                "configurations": [
+                    "Server (.NET)",
+                    "UI (Chrome)"
+                ],
+                "stopAll": true
+            }
+        ]
+    }
+}

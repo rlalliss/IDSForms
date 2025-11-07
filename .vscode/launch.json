@@ -1,0 +1,32 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Server (.NET)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "server:watch",
+      "program": "${workspaceFolder}/server/bin/Debug/net8.0/server.dll",
+      "cwd": "${workspaceFolder}/server",
+      "env": { "ASPNETCORE_URLS": "http://localhost:5000" },
+      "console": "integratedTerminal",
+      "stopAtEntry": false,
+      "serverReadyAction": { "action": "none" }   // don't auto-open Swagger
+    },
+    {
+      "name": "UI (Chrome)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:5173/login",
+      "webRoot": "${workspaceFolder}/ui",
+      "preLaunchTask": "ui:dev"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Debug Full Stack",
+      "configurations": ["Server (.NET)", "UI (Chrome)"],
+      "stopAll": true
+    }
+  ]
+}
