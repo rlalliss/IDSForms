@@ -5,6 +5,8 @@
       "name": "Server (.NET)",
       "type": "coreclr",
       "request": "launch",
+      "project": "server/server.csproj",
+      "launchSettingsProfile": "https",
       "preLaunchTask": "server:watch",
       "program": "${workspaceFolder}/server/bin/Debug/net8.0/server.dll",
       "cwd": "${workspaceFolder}/server",

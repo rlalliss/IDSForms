@@ -6,7 +6,8 @@ export default function Login() {
   const login = async (e: React.FormEvent) => {
     e.preventDefault();
     await api.post("/auth/login", { userName, password });
-    window.location.href = "/"; // go to list
+    // Force full reload so App.jsx revalidates auth state
+    window.location.href = "/dashboard";
   };
   return (
     <form onSubmit={login} style={{maxWidth:360, margin:"60px auto"}}>

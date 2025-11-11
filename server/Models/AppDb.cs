@@ -10,4 +10,6 @@ public sealed class AppDb : DbContext {
   public DbSet<FormDefault> FormDefaults => Set<FormDefault>();
   public DbSet<EmailTemplate> EmailTemplates => Set<EmailTemplate>();
   public DbSet<Submission> Submissions => Set<Submission>();
+  public DbSet<SignatureRequirement> SignatureRequirements => Set<SignatureRequirement>();
+  public DbSet<SubmissionSignature> SubmissionSignatures => Set<SubmissionSignature>();
 }

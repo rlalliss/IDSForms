@@ -1,0 +1,2 @@
+CREATE SCHEMA IF NOT EXISTS app AUTHORIZATION CURRENT_USER;
+SET search_path = app, public;

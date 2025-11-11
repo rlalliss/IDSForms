@@ -1,0 +1,19 @@
+SET search_path = app, public;
+
+DO $dir\08_seed.sql
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_reader') THEN
+    CREATE ROLE app_reader NOINHERIT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'app_writer') THEN
+    CREATE ROLE app_writer NOINHERIT;
+  END IF;
+END$dir\08_seed.sql;
+
+GRANT USAGE ON SCHEMA app TO app_reader, app_writer;
+
+GRANT SELECT ON ALL TABLES IN SCHEMA app TO app_reader;
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA app TO app_writer;
+
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT SELECT ON TABLES TO app_reader;
+ALTER DEFAULT PRIVILEGES IN SCHEMA app GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO app_writer;

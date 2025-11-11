@@ -78,7 +78,7 @@ export default function Dashboard(): JSX.Element {
             <div className="flex gap-2">
               <button
                 className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-gray-50 active:translate-y-[1px]"
-                onClick={() => (window.location.href = "/forms")}
+                onClick={() => (window.location.href = "/fill")}
               >
                 New Submission
               </button>
@@ -157,6 +157,11 @@ export default function Dashboard(): JSX.Element {
                 </a>
               </li>
               <li>
+                <a className="text-blue-600 hover:underline" href="/fill">
+                  Start new submission
+                </a>
+              </li>
+              <li>
                 <a className="text-blue-600 hover:underline" href="/submissions">
                   Submission history
                 </a>
@@ -164,6 +169,11 @@ export default function Dashboard(): JSX.Element {
               <li>
                 <a className="text-blue-600 hover:underline" href="/settings">
                   User defaults
+                </a>
+              </li>
+              <li>
+                <a className="text-blue-600 hover:underline" href="/sign">
+                  Sign a form
                 </a>
               </li>
             </ul>

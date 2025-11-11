@@ -7,6 +7,10 @@
         {
             "name": "ui",
             "path": "ui"
+        },
+        {
+            "name": "server.Tests",
+            "path": "server.Tests"
         }
     ],
     "settings": {},
@@ -32,7 +36,7 @@
                 "problemMatcher": {
                     "owner": "dotnet",
                     "fileLocation": [
-                        "auto",
+                        "autoDetect",
                         "${workspaceFolder:server}"
                     ],
                     "pattern": [
@@ -46,8 +50,8 @@
                     ],
                     "background": {
                         "activeOnStart": true,
-                        "beginsPattern": "^dotnet watch",
-                        "endsPattern": "Now listening on:\\s+http://localhost:5000"
+                        "beginsPattern": "^(?:watch|dotnet watch)",
+                        "endsPattern": "Now listening on:\\s+https?://"
                     }
                 }
             },
@@ -67,7 +71,7 @@
                     {
                         "owner": "vite",
                         "fileLocation": [
-                            "autodetect",
+                            "autoDetect",
                             "${workspaceFolder:ui}"
                         ],
                         "pattern": [
@@ -96,18 +100,20 @@
                 "name": "Server (.NET)",
                 "type": "coreclr",
                 "request": "launch",
-                "preLaunchTask": "server:watch",
+                "launchSettingsProfile": "https",
                 "program": "${workspaceFolder:server}/bin/Debug/net8.0/server.dll",
                 "cwd": "${workspaceFolder:server}",
                 "env": {
-                    "ASPNETCORE_URLS": "http://localhost:5000"
+                    "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
+                    "ASPNETCORE_HTTPS_PORT": "5001",
+                    "ASPNETCORE_ENVIRONMENT": "Development"
                 },
                 "console": "integratedTerminal",
                 "stopAtEntry": false
             },
             {
                 "name": "UI (Chrome)",
-                "type": "pwa-chrome",
+                "type": "chrome",
                 "request": "launch",
                 "url": "http://localhost:5173/login",
                 "webRoot": "${workspaceFolder:ui}",

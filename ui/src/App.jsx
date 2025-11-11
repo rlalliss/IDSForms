@@ -1,13 +1,25 @@
 // src/App.jsx
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import Login from "./pages/Login";
+import Login from "./pages/login";
 import Dashboard from "./pages/Dashboard"; // if you made Dashboard.tsx, this import still works in Vite
+import Signatures from "./pages/Signatures";
+import Forms from "./pages/Forms";
+import Fill from "./pages/Fill";
+import { api } from "./api";
 
 export default function App() {
-  // TODO: replace with your real auth check (cookie/token/ctx)
-  console.log("App.jsx mounted"); // quick sanity check
-  const isAuthed = false;
+  // Use real auth check via /api/auth/me
+  const [isAuthed, setIsAuthed] = React.useState(null);
+
+  React.useEffect(() => {
+    api
+      .get("/auth/me")
+      .then(() => setIsAuthed(true))
+      .catch(() => setIsAuthed(false));
+  }, []);
+
+  if (isAuthed === null) return null; // or a small loader
 
   return (
     <BrowserRouter>
@@ -18,7 +30,15 @@ export default function App() {
           element={isAuthed ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
         />
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={isAuthed ? <Dashboard /> : <Navigate to="/login" replace />}
+        />
+        <Route path="/forms" element={<Forms />} />
+        <Route path="/fill" element={<Fill />} />
+        <Route path="/fill/:slug" element={<Fill />} />
+        <Route path="/sign" element={<Signatures />} />
+        <Route path="/sign/:slug" element={<Signatures />} />
         {/* add more routes here, e.g. forms, submissions, settings */}
       </Routes>
     </BrowserRouter>
