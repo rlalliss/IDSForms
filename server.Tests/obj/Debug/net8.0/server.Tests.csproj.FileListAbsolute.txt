@@ -16,6 +16,7 @@ D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server.Tests\bin\Debug\
 D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server.Tests\bin\Debug\net8.0\Azure.Core.dll
 D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server.Tests\bin\Debug\net8.0\Azure.Storage.Blobs.dll
 D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server.Tests\bin\Debug\net8.0\Azure.Storage.Common.dll
+D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server.Tests\bin\Debug\net8.0\Azure.Storage.Files.Shares.dll
 D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server.Tests\bin\Debug\net8.0\BCrypt.Net-Next.dll
 D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server.Tests\bin\Debug\net8.0\BouncyCastle.Cryptography.dll
 D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server.Tests\bin\Debug\net8.0\Castle.Core.dll

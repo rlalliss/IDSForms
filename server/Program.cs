@@ -12,9 +12,9 @@ var storageMode = builder.Configuration["Storage:Mode"] ?? "Local";
 // if (string.Equals(storageMode, "Azure", StringComparison.OrdinalIgnoreCase))
 //     builder.Services.AddSingleton<IStorageService, AzureBlobStorageService>();
 // else if (string.Equals(storageMode, "AzureFiles", StringComparison.OrdinalIgnoreCase))
-     builder.Services.AddSingleton<IStorageService, AzureFileShareStorageService>();
+//     builder.Services.AddSingleton<IStorageService, AzureFileShareStorageService>();
 // else
-//     builder.Services.AddSingleton<IStorageService, LocalStorageService>();
+     builder.Services.AddSingleton<IStorageService, LocalStorageService>();
 
 builder.Services.AddAuthentication("cookie")
   .AddCookie("cookie", o =>
