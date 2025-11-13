@@ -71,6 +71,22 @@ try
 }
 catch { }
 
+var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("CorsDebug");
+
+app.Use(async (ctx, next) =>
+{
+    if (ctx.Request.Headers.TryGetValue("Origin", out var origin))
+    {
+        logger.LogInformation("Request origin: {Origin}", origin.ToString());
+    }
+    else
+    {
+        logger.LogInformation("Request without Origin header: {Path}", ctx.Request.Path);
+    }
+
+    await next();
+});
+
 app.UseCors("ui");
 app.UseAuthentication();
 app.UseAuthorization();
