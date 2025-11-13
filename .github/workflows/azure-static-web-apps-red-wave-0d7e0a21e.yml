@@ -28,8 +28,12 @@ jobs:
           cache-dependency-path: 'ui/package-lock.json'
           
       - name: Install UI deps
-        working-directory: ui
         run: npm ci
+        working-directory: ui
+
+      - name: Build UI
+        run: npm run build
+        working-directory: ui
 
       - name: Build And Deploy
         id: builddeploy
@@ -56,6 +60,7 @@ jobs:
         with:
           azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN_RED_WAVE_0D7E0A21E }}
           action: "close"
+
 
 
 
