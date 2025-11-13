@@ -51,14 +51,6 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
-            "Azure.Storage.Blobs": {
-              "target": "Package",
-              "version": "[12.20.0, )"
-            },
-            "Azure.Storage.Files.Shares": {
-              "target": "Package",
-              "version": "[12.18.0, )"
-            },
             "BCrypt.Net-Next": {
               "target": "Package",
               "version": "[4.0.3, )"
