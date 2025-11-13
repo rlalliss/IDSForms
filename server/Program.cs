@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi.Models;
+using Microsoft.Extensions.FileProviders;
+
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDb>(o =>
@@ -45,6 +47,9 @@ builder.Services.AddSingleton<IPdfFieldDiscovery, PdfFieldDiscovery>();
 
 var app = builder.Build();
 
+var spaDistPath = Path.GetFullPath(
+    Path.Combine(builder.Environment.ContentRootPath, "..", "ui", "dist"));
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -69,7 +74,25 @@ catch { }
 app.UseCors("ui");
 app.UseAuthentication();
 app.UseAuthorization();
+
+if (Directory.Exists(spaDistPath))
+{
+    var spaFileProvider = new PhysicalFileProvider(spaDistPath);
+    app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = spaFileProvider });
+    app.UseStaticFiles(new StaticFileOptions { FileProvider = spaFileProvider });
+}
+
 app.MapControllers();
+
+if (Directory.Exists(spaDistPath))
+{
+    app.MapFallback(async ctx =>
+    {
+        ctx.Response.ContentType = "text/html";
+        await ctx.Response.SendFileAsync(Path.Combine(spaDistPath, "index.html"));
+    });
+}
+
 app.UseHttpsRedirection();
 
 app.Run();
