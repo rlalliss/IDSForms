@@ -137,6 +137,7 @@ app.UseAuthorization();
 //     app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = spaFileProvider });
 //     app.UseStaticFiles(new StaticFileOptions { FileProvider = spaFileProvider });
 //}
+app.MapGet("/debug/ping", () => Results.Ok("pong"));
 
 app.MapControllers();
 
