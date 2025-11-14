@@ -157,7 +157,7 @@
                 "name": "UI (Chrome)",
                 "type": "chrome",
                 "request": "launch",
-                "url": "http://localhost:5173/dashboard",
+                "url": "http://localhost:5173",
                 "webRoot": "${workspaceFolder:ui}",
                 "preLaunchTask": "ui:dev"
             }
