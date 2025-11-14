@@ -27,8 +27,11 @@ builder.Services.AddAuthentication("cookie")
   });
 builder.Services.AddAuthorization();
 builder.Services.AddCors(o => o.AddPolicy("ui", p => p
-  .WithOrigins(builder.Configuration["Cors:Origin"]!)
+  .WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net")
   .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+// builder.Services.AddCors(o => o.AddPolicy("ui", p => p
+//   .WithOrigins(builder.Configuration["Cors:Origin"]!)
+//   .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 builder.Services.AddSwaggerGen(c =>
