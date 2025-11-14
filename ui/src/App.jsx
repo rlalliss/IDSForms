@@ -23,7 +23,7 @@ export default function App() {
   // const [isAuthed, setIsAuthed] = React.useState({ userName: "admin", fullName: "admin User" });
   // setIsAuthed(true)
 
-  if (isAuthed === null) return null; // or a small loader
+  //if (isAuthed === null) return null; // or a small loader
 
   return (
     <BrowserRouter>
@@ -35,7 +35,7 @@ export default function App() {
           element={isAuthed ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
         /> */}
         <Route path="/login" element={<Login />} />
-        <Route path="/dashboard" element={<dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
         {/* <Route
           path="/dashboard"
           element={isAuthed ? <Dashboard /> : <Navigate to="/login" replace />}
