@@ -6,7 +6,7 @@ const envUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 if (!envUrl) {
   throw new Error("VITE_API_BASE_URL is not set");
 }
-console.log("API baseURL at runtime:", envUrl);
+
 const baseURL = envUrl ;
 
 // Helpful during setup: see which URL is used

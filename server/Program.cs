@@ -126,6 +126,7 @@ var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Cor
 //     await next();
 // });
 
+app.UseRouting();
 app.UseCors("AllowStaticWebApp");
 app.UseAuthentication();
 app.UseAuthorization();
