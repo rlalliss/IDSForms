@@ -43,7 +43,8 @@ builder.Services.AddSingleton<IEmailService, EmailService>();
 builder.Services.AddSingleton<IPdfFillService, PdfFillService>();
 builder.Services.AddSingleton<ISignatureService, SignatureService>();
 builder.Services.AddSingleton<IPdfFieldDiscovery, PdfFieldDiscovery>();
-
+builder.Services.AddApplicationInsightsTelemetry();
+builder.Logging.AddApplicationInsights();
 
 var app = builder.Build();
 

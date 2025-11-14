@@ -63,6 +63,10 @@
               "target": "Package",
               "version": "[4.14.1, )"
             },
+            "Microsoft.ApplicationInsights.AspNetCore": {
+              "target": "Package",
+              "version": "[2.23.0, )"
+            },
             "Microsoft.AspNetCore.Authentication.Cookies": {
               "target": "Package",
               "version": "[2.3.0, )"
