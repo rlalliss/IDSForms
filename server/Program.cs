@@ -17,8 +17,8 @@ builder.Services.AddDbContext<AppDb>(o =>
 builder.Services.AddSingleton<IStorageService, LocalStorageService>();
 
 builder.Services.AddAuthentication("cookie")
-  .AddCookie("cookie", o =>
-  {
+    .AddCookie("cookie", o =>
+    {
       o.LoginPath = "/api/auth/login";
       o.Cookie.Name = "pdfapp";
       var isDev = builder.Environment.IsDevelopment();
@@ -27,19 +27,42 @@ builder.Services.AddAuthentication("cookie")
       // In production, require cross-site cookie with Secure.
       o.Cookie.SameSite = isDev ? SameSiteMode.Lax : SameSiteMode.None;
       o.Cookie.SecurePolicy = isDev ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
-  });
+
+      o.Events.OnRedirectToLogin = ctx =>
+      {
+        if (ctx.Request.Path.StartsWithSegments("/api"))
+        {
+          ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+          return Task.CompletedTask;
+        }
+        ctx.Response.Redirect(ctx.RedirectUri);
+        return Task.CompletedTask;
+      };
+
+      o.Events.OnRedirectToAccessDenied = ctx =>
+      {
+        if (ctx.Request.Path.StartsWithSegments("/api"))
+        {
+          ctx.Response.StatusCode = StatusCodes.Status403Forbidden;
+          return Task.CompletedTask;
+        }
+        ctx.Response.Redirect(ctx.RedirectUri);
+        return Task.CompletedTask;
+      };
+    });
+
 builder.Services.AddAuthorization();
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy(name: "AllowStaticWebApp",
-                      policy =>
-                      {
-                          policy.WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net").AllowAnyHeader().AllowAnyMethod();
-                      });
-});
-// builder.Services.AddCors(o => o.AddPolicy("ui", p => p
-//   .WithOrigins(builder.Configuration["Cors:Origin"]!)
-//   .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+// builder.Services.AddCors(options =>
+// {
+//     options.AddPolicy(name: "AllowStaticWebApp",
+//                       policy =>
+//                       {
+//                           policy.WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net").AllowAnyHeader().AllowAnyMethod();
+//                       });
+// });
+builder.Services.AddCors(o => o.AddPolicy("AllowStaticWebApp", p => p
+  .WithOrigins(builder.Configuration["Cors:Origin"]!)
+  .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddControllers();
 // builder.Services.AddSwaggerGen(c =>

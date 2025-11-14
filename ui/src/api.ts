@@ -2,8 +2,11 @@ import axios from "axios";
 
 // Use Vite dev proxy in development: all requests go to /api
 // Vite forwards /api -> https://localhost:5001 (see vite.config.js)
-const baseURL = import.meta.env.VITE_API_BASE_URL?.trim() || "/api";
-
+const envUrl = import.meta.env.VITE_API_BASE_URL?.trim();
+if (!envUrl) {
+  throw new Error("VITE_API_BASE_URL is not set");
+}
+const baseURL = envUrl ;
 
 // Helpful during setup: see which URL is used
 if (typeof window !== "undefined") {
