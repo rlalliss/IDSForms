@@ -10,7 +10,7 @@ builder.Services.AddDbContext<AppDb>(o =>
    .UseSnakeCaseNamingConvention());
 
 // Storage service wiring
-var storageMode = builder.Configuration["Storage:Mode"] ?? "Local";
+//var storageMode = builder.Configuration["Storage:Mode"] ?? "Local";
 builder.Services.AddSingleton<IStorageService, LocalStorageService>();
 
 builder.Services.AddAuthentication("cookie")
@@ -26,9 +26,15 @@ builder.Services.AddAuthentication("cookie")
       o.Cookie.SecurePolicy = isDev ? CookieSecurePolicy.None : CookieSecurePolicy.Always;
   });
 builder.Services.AddAuthorization();
-builder.Services.AddCors(o => o.AddPolicy("ui", p => p
-  .WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net")
-  .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
+builder.Services.AddCors(options =>
+{
+  options.AddPolicy(name: "ui",
+                    policy =>
+                    {
+                        policy.WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net",
+                                            "http://www.contoso.com");
+                    });
+});
 // builder.Services.AddCors(o => o.AddPolicy("ui", p => p
 //   .WithOrigins(builder.Configuration["Cors:Origin"]!)
 //   .AllowAnyHeader().AllowAnyMethod().AllowCredentials()));
@@ -67,29 +73,29 @@ if (app.Environment.IsDevelopment())
 }
 
 // Log which storage mode/implementation is active for clarity
-try
-{
-    var storageSvc = app.Services.GetRequiredService<IStorageService>();
-    var log = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
-    log.LogInformation("Storage mode: {Mode}; Implementation: {Impl}", storageMode, storageSvc.GetType().FullName);
-}
-catch { }
+// try
+// {
+//     var storageSvc = app.Services.GetRequiredService<IStorageService>();
+//     var log = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+//     log.LogInformation("Storage mode: {Mode}; Implementation: {Impl}", storageMode, storageSvc.GetType().FullName);
+// }
+// catch { }
 
-var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("CorsDebug");
+//var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("CorsDebug");
 
-app.Use(async (ctx, next) =>
-{
-    if (ctx.Request.Headers.TryGetValue("Origin", out var origin))
-    {
-        logger.LogInformation("Request origin: {Origin}", origin.ToString());
-    }
-    else
-    {
-        logger.LogInformation("Request without Origin header: {Path}", ctx.Request.Path);
-    }
+// app.Use(async (ctx, next) =>
+// {
+//     if (ctx.Request.Headers.TryGetValue("Origin", out var origin))
+//     {
+//         logger.LogInformation("Request origin: {Origin}", origin.ToString());
+//     }
+//     else
+//     {
+//         logger.LogInformation("Request without Origin header: {Path}", ctx.Request.Path);
+//     }
 
-    await next();
-});
+//     await next();
+// });
 
 app.UseCors("ui");
 app.UseAuthentication();
