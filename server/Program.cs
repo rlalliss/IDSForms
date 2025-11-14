@@ -32,7 +32,7 @@ builder.Services.AddCors(options =>
                     policy =>
                     {
                         policy.WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net",
-                                            "http://www.contoso.com");
+                                            "http://www.contoso.com").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
                     });
 });
 // builder.Services.AddCors(o => o.AddPolicy("ui", p => p

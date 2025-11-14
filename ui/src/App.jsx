@@ -19,6 +19,10 @@ export default function App() {
       .catch(() => setIsAuthed(false));
   }, []);
 
+  //temp to bypass login, uncomment above for real auth
+  // const [isAuthed, setIsAuthed] = useState({ userName: "dev", fullName: "Dev User" });
+  // setIsAuthed(true)
+
   if (isAuthed === null) return null; // or a small loader
 
   return (
