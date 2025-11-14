@@ -20,7 +20,7 @@ export default function App() {
   }, []);
 
   //temp to bypass login, uncomment above for real auth
-  // const [isAuthed, setIsAuthed] = useState({ userName: "dev", fullName: "Dev User" });
+  // const [isAuthed, setIsAuthed] = React.useState({ userName: "admin", fullName: "admin User" });
   // setIsAuthed(true)
 
   if (isAuthed === null) return null; // or a small loader

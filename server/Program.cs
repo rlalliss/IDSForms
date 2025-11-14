@@ -31,8 +31,7 @@ builder.Services.AddCors(options =>
   options.AddPolicy(name: "ui",
                     policy =>
                     {
-                        policy.WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net",
-                                            "http://www.contoso.com").AllowAnyHeader().AllowAnyMethod().AllowCredentials();
+                        policy.WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net").AllowAnyHeader().AllowAnyMethod();
                     });
 });
 // builder.Services.AddCors(o => o.AddPolicy("ui", p => p
@@ -81,21 +80,21 @@ if (app.Environment.IsDevelopment())
 // }
 // catch { }
 
-//var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("CorsDebug");
+var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("CorsDebug");
 
-// app.Use(async (ctx, next) =>
-// {
-//     if (ctx.Request.Headers.TryGetValue("Origin", out var origin))
-//     {
-//         logger.LogInformation("Request origin: {Origin}", origin.ToString());
-//     }
-//     else
-//     {
-//         logger.LogInformation("Request without Origin header: {Path}", ctx.Request.Path);
-//     }
+app.Use(async (ctx, next) =>
+{
+    if (ctx.Request.Headers.TryGetValue("Origin", out var origin))
+    {
+        logger.LogInformation("Request origin: {Origin}", origin.ToString());
+    }
+    else
+    {
+        logger.LogInformation("Request without Origin header: {Path}", ctx.Request.Path);
+    }
 
-//     await next();
-// });
+    await next();
+});
 
 app.UseCors("ui");
 app.UseAuthentication();
