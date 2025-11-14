@@ -2,11 +2,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.FileProviders;
+using Npgsql;
 
 
 var builder = WebApplication.CreateBuilder(args);
+
+var conn = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<AppDb>(o =>
-  o.UseNpgsql(builder.Configuration.GetConnectionString("Default"))
+  o.UseNpgsql(conn)
    .UseSnakeCaseNamingConvention());
 
 // Storage service wiring
@@ -28,11 +31,11 @@ builder.Services.AddAuthentication("cookie")
 builder.Services.AddAuthorization();
 builder.Services.AddCors(options =>
 {
-  options.AddPolicy(name: "AllowStaticWebApp",
-                    policy =>
-                    {
-                        policy.WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net").AllowAnyHeader().AllowAnyMethod();
-                    });
+    options.AddPolicy(name: "AllowStaticWebApp",
+                      policy =>
+                      {
+                          policy.WithOrigins("https://red-wave-0d7e0a21e.3.azurestaticapps.net").AllowAnyHeader().AllowAnyMethod();
+                      });
 });
 // builder.Services.AddCors(o => o.AddPolicy("ui", p => p
 //   .WithOrigins(builder.Configuration["Cors:Origin"]!)
@@ -55,6 +58,10 @@ builder.Services.AddSingleton<IPdfFieldDiscovery, PdfFieldDiscovery>();
 // builder.Logging.AddApplicationInsights();
 
 var app = builder.Build();
+
+var log = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+log.LogInformation("Starting IDSForms application");
+log.LogInformation("Using DB host {Host}", new NpgsqlConnectionStringBuilder(conn).Host);
 
 // var spaDistPath = Path.GetFullPath(
 //     Path.Combine(builder.Environment.ContentRootPath, "..", "ui", "dist"));
@@ -80,7 +87,7 @@ var app = builder.Build();
 // }
 // catch { }
 
-// var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("CorsDebug");
+var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("CorsDebug");
 
 // app.Use(async (ctx, next) =>
 // {
