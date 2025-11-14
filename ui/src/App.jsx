@@ -10,14 +10,14 @@ import { api } from "./api";
 
 export default function App() {
   // Use real auth check via /api/auth/me
-  const [isAuthed, setIsAuthed] = React.useState(null);
+  // const [isAuthed, setIsAuthed] = React.useState(null);
 
-  React.useEffect(() => {
-    api
-      .get("/auth/me")
-      .then(() => setIsAuthed(true))
-      .catch(() => setIsAuthed(false));
-  }, []);
+  // React.useEffect(() => {
+  //   api
+  //     .get("/auth/me")
+  //     .then(() => setIsAuthed(true))
+  //     .catch(() => setIsAuthed(false));
+  // }, []);
 
   //temp to bypass login, uncomment above for real auth
   // const [isAuthed, setIsAuthed] = React.useState({ userName: "admin", fullName: "admin User" });
@@ -29,15 +29,17 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Start app at /login if not authenticated */}
-        <Route
+        <Route path="/" element={<Dashboard />} />
+        {/* <Route
           path="/"
           element={isAuthed ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
-        />
+        /> */}
         <Route path="/login" element={<Login />} />
-        <Route
+        <Route path="/dashboard" element={<dashboard />} />
+        {/* <Route
           path="/dashboard"
           element={isAuthed ? <Dashboard /> : <Navigate to="/login" replace />}
-        />
+        /> */}
         <Route path="/forms" element={<Forms />} />
         <Route path="/fill" element={<Fill />} />
         <Route path="/fill/:slug" element={<Fill />} />
