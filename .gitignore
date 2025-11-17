@@ -1,0 +1,19 @@
+## Build directories
+bin/
+obj/
+
+# Project-scoped outputs
+server/bin/
+server/obj/
+server/publish/
+server/publish-test/
+server.Tests/bin/
+server.Tests/obj/
+
+# UI build artefacts
+ui/dist/
+ui/node_modules/
+
+# Environment files
+*.env
+*.env.local

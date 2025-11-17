@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 
+const apiBase = api.defaults.baseURL?.replace(/\/$/, '') ?? '';
+
 type FormItem = { slug: string; title: string; category?: string | null; description?: string | null };
 
 export default function Forms() {
@@ -89,7 +91,7 @@ export default function Forms() {
                       </button>
                       <a
                         className="text-blue-600 hover:underline"
-                        href={`/api/forms/${encodeURIComponent(f.slug)}/pdf`}
+                        href={`${apiBase}/forms/${encodeURIComponent(f.slug)}/pdf`}
                         target="_blank" rel="noreferrer"
                       >
                         Preview
