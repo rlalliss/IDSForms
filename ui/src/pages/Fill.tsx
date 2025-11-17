@@ -1,10 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { api } from '../api';
 
 type FieldMeta = { pdfFieldName: string; label: string; type: string; required: boolean; orderIndex: number };
 type MetaResp = { slug: string; title: string; pdfBlobPath: string; fields: FieldMeta[] };
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
 
 export default function Fill() {
   const { slug: slugParam } = useParams<{ slug: string }>();
@@ -19,24 +18,18 @@ export default function Fill() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  function path(...parts: string[]) { return parts.map(p => p.replace(/\/+$/, '')).join(''); }
-
   async function load() {
     if (!slug) return;
     setLoading(true); setError('');
     try {
       const [metaRes, prefillRes] = await Promise.all([
-        fetch(path(API_BASE, `/api/forms/${encodeURIComponent(slug)}`), { credentials: 'include' }),
-        fetch(path(API_BASE, `/api/forms/${encodeURIComponent(slug)}/prefill`), { credentials: 'include' }),
+        api.get<MetaResp>(`/forms/${encodeURIComponent(slug)}`),
+        api.get<Record<string, string>>(`/forms/${encodeURIComponent(slug)}/prefill`)
       ]);
-      if (!metaRes.ok) throw new Error(`Meta failed: ${metaRes.status}`);
-      if (!prefillRes.ok) throw new Error(`Prefill failed: ${prefillRes.status}`);
-      const metaData = (await metaRes.json()) as MetaResp;
-      const prefill = (await prefillRes.json()) as Record<string, string>;
-      setMeta(metaData);
-      setValues(prefill);
+      setMeta(metaRes.data);
+      setValues(prefillRes.data);
     } catch (e: any) {
-      setError(e.message || String(e));
+      setError(e.response?.data?.message || e.message || String(e));
     } finally { setLoading(false); }
   }
 
@@ -48,30 +41,27 @@ export default function Fill() {
     if (!slug) return;
     setLoading(true); setError('');
     try {
-      const res = await fetch(path(API_BASE, `/api/forms/${encodeURIComponent(slug)}/preview`), {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-        body: JSON.stringify({ values })
-      });
-      if (!res.ok) throw new Error(`Preview failed: ${res.status}`);
-      const blob = await res.blob();
+      const res = await api.post(`/forms/${encodeURIComponent(slug)}/preview`, { values }, { responseType: 'blob' });
+      const blob = res.data as Blob;
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
       setTimeout(() => URL.revokeObjectURL(url), 60_000);
-    } catch (e: any) { setError(e.message || String(e)); } finally { setLoading(false); }
+    } catch (e: any) { setError(e.response?.data?.message || e.message || String(e)); } finally { setLoading(false); }
   }
 
   async function submit() {
     if (!slug) return;
     setLoading(true); setError('');
     try {
-      const res = await fetch(path(API_BASE, `/api/forms/${encodeURIComponent(slug)}/submit`), {
-        method: 'POST', headers: { 'Content-Type': 'application/json' }, credentials: 'include',
-        body: JSON.stringify({ values, flatten, toOverride, ccOverride, bccOverride })
+      const res = await api.post(`/forms/${encodeURIComponent(slug)}/submit`, {
+        values,
+        flatten,
+        toOverride,
+        ccOverride,
+        bccOverride
       });
-      if (!res.ok) throw new Error(`Submit failed: ${res.status}`);
-      const data = await res.json();
-      alert(`Submitted. Email Message Id: ${data.emailMessageId || 'n/a'}`);
-    } catch (e: any) { setError(e.message || String(e)); } finally { setLoading(false); }
+      alert(`Submitted. Email Message Id: ${res.data?.emailMessageId || 'n/a'}`);
+    } catch (e: any) { setError(e.response?.data?.message || e.message || String(e)); } finally { setLoading(false); }
   }
 
   // Basic required detection
@@ -146,4 +136,3 @@ export default function Fill() {
     </div>
   );
 }
-

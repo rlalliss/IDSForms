@@ -163,7 +163,12 @@ public sealed class FormsController : ControllerBase
         var template = await _storage.GetLocalPathAsync(form.PdfBlobPath, HttpContext.RequestAborted);
         var pdfPath = await _pdf.FillAsync(template, values, req.Flatten, HttpContext.RequestAborted);
 
-        var tpl = form.EmailTemplate!;
+        var tpl = form.EmailTemplate;
+        if (tpl is null)
+        {
+            System.IO.File.Delete(pdfPath);
+            return BadRequest(new { error = "Form is missing an email template configuration." });
+        }
         string Render(string s) => values.Aggregate(s, (acc, kv) => acc.Replace("{{" + kv.Key + "}}", kv.Value ?? ""));
 
         var to = string.IsNullOrWhiteSpace(req.ToOverride) ? tpl.To : req.ToOverride!;

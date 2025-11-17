@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { api } from '../api';
 
 type StatusItem = {
   id: string;
@@ -14,8 +15,6 @@ type StatusItem = {
 };
 
 type StatusResponse = { items: StatusItem[] };
-
-const API_BASE = (import.meta as any).env?.VITE_API_URL || 'http://localhost:5000';
 
 export default function Signatures() {
   const { slug: slugParam } = useParams<{ slug: string }>();
@@ -43,23 +42,15 @@ export default function Signatures() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug, submissionId]);
 
-  function path(...parts: string[]) {
-    return parts.map((p) => p.replace(/\/+$/, '')).join('');
-  }
-
   async function refreshStatus() {
     if (!slug || !submissionId) return;
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(path(API_BASE, `/api/forms/${encodeURIComponent(slug)}/signing/${submissionId}/status`), {
-        credentials: 'include',
-      });
-      if (!res.ok) throw new Error(`Status failed: ${res.status}`);
-      const data = (await res.json()) as StatusResponse;
-      setStatus(data);
+      const res = await api.get<StatusResponse>(`/forms/${encodeURIComponent(slug)}/signing/${submissionId}/status`);
+      setStatus(res.data);
     } catch (e: any) {
-      setError(e.message || String(e));
+      setError(e.response?.data?.message || e.message || String(e));
     } finally {
       setLoading(false);
     }
@@ -73,18 +64,14 @@ export default function Signatures() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(path(API_BASE, `/api/forms/${encodeURIComponent(slug)}/signing/start`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ Values: {}, Flatten: true }),
+      const res = await api.post(`/forms/${encodeURIComponent(slug)}/signing/start`, {
+        values: {},
+        flatten: true,
       });
-      if (!res.ok) throw new Error(`Start failed: ${res.status}`);
-      const data = await res.json();
-      setSubmissionId(data.submissionId);
-      setStatus(data.status as StatusResponse);
+      setSubmissionId(res.data.submissionId);
+      setStatus(res.data.status as StatusResponse);
     } catch (e: any) {
-      setError(e.message || String(e));
+      setError(e.response?.data?.message || e.message || String(e));
     } finally {
       setLoading(false);
     }
@@ -162,18 +149,14 @@ export default function Signatures() {
     setLoading(true);
     setError('');
     try {
-      const res = await fetch(path(API_BASE, `/api/forms/${encodeURIComponent(slug)}/signing/${submissionId}/capture`), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ SignatureRequirementId: nextUnsigned.id, DataUrl: dataUrl }),
+      await api.post(`/forms/${encodeURIComponent(slug)}/signing/${submissionId}/capture`, {
+        signatureRequirementId: nextUnsigned.id,
+        dataUrl,
       });
-      if (!res.ok) throw new Error(`Capture failed: ${res.status}`);
-      await res.json();
       clearCanvas();
       await refreshStatus();
     } catch (e: any) {
-      setError(e.message || String(e));
+      setError(e.response?.data?.message || e.message || String(e));
     } finally {
       setLoading(false);
     }
@@ -247,4 +230,3 @@ export default function Signatures() {
     </div>
   );
 }
-

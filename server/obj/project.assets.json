@@ -15,7 +15,7 @@
           }
         }
       },
-      "BouncyCastle.Cryptography/2.6.1": {
+      "BouncyCastle.Cryptography/2.6.2": {
         "type": "package",
         "compile": {
           "lib/net6.0/BouncyCastle.Cryptography.dll": {
@@ -146,6 +146,23 @@
           }
         }
       },
+      "itext.bouncy-castle-adapter/9.3.0": {
+        "type": "package",
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.6.2",
+          "itext.commons": "9.3.0"
+        },
+        "compile": {
+          "lib/netstandard2.0/itext.bouncy-castle-adapter.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/itext.bouncy-castle-adapter.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "itext.commons/9.3.0": {
         "type": "package",
         "dependencies": {
@@ -167,6 +184,12 @@
         "type": "package",
         "dependencies": {
           "itext": "9.3.0"
+        }
+      },
+      "itext7.bouncy-castle-adapter/9.3.0": {
+        "type": "package",
+        "dependencies": {
+          "itext.bouncy-castle-adapter": "9.3.0"
         }
       },
       "MailKit/4.14.1": {
@@ -3204,16 +3227,16 @@
         "readme.md"
       ]
     },
-    "BouncyCastle.Cryptography/2.6.1": {
-      "sha512": "vZsG2YILhthgRqO+ZVgRff4ZFKKTl0v7kqaVBLCtRvpREhfBP33pcWrdA3PRYgWuFL1RxiUFvjMUHTdBZlJcoA==",
+    "BouncyCastle.Cryptography/2.6.2": {
+      "sha512": "7oWOcvnntmMKNzDLsdxAYqApt+AjpRpP2CShjMfIa3umZ42UQMvH0tl1qAliYPNYO6vTdcGMqnRrCPmsfzTI1w==",
       "type": "package",
-      "path": "bouncycastle.cryptography/2.6.1",
+      "path": "bouncycastle.cryptography/2.6.2",
       "files": [
         ".nupkg.metadata",
         ".signature.p7s",
         "LICENSE.md",
         "README.md",
-        "bouncycastle.cryptography.2.6.1.nupkg.sha512",
+        "bouncycastle.cryptography.2.6.2.nupkg.sha512",
         "bouncycastle.cryptography.nuspec",
         "lib/net461/BouncyCastle.Cryptography.dll",
         "lib/net461/BouncyCastle.Cryptography.xml",
@@ -3317,6 +3340,22 @@
         "lib/netstandard2.0/itext.svg.xml"
       ]
     },
+    "itext.bouncy-castle-adapter/9.3.0": {
+      "sha512": "C7q8wbwDyc2npzKBRF46KnueJON6in3QEdPlsz7VvXDqClRF1C0VfE6HwVCpJJ5Q5qADNSYNbtXFZgD7T1/51g==",
+      "type": "package",
+      "path": "itext.bouncy-castle-adapter/9.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "ITSC-avatar.png",
+        "itext.bouncy-castle-adapter.9.3.0.nupkg.sha512",
+        "itext.bouncy-castle-adapter.nuspec",
+        "lib/net461/itext.bouncy-castle-adapter.dll",
+        "lib/net461/itext.bouncy-castle-adapter.xml",
+        "lib/netstandard2.0/itext.bouncy-castle-adapter.dll",
+        "lib/netstandard2.0/itext.bouncy-castle-adapter.xml"
+      ]
+    },
     "itext.commons/9.3.0": {
       "sha512": "kSoAGkXjI0vASBREnT1rvhUae1xQX2jd/W5ot0pmaqeurzpVGP04u10Mk0DqZZBTDaF5p/g9KRFnqxhjfOE2hA==",
       "type": "package",
@@ -3345,6 +3384,20 @@
         "gnu-agpl-v3.0.md",
         "itext7.9.3.0.nupkg.sha512",
         "itext7.nuspec"
+      ]
+    },
+    "itext7.bouncy-castle-adapter/9.3.0": {
+      "sha512": "B8I9+xX+96T1+CTKeXq0UlWSMQcGigUkzqaQSXJT6RmfkK1zTVxDJDw5RdmwziY4xdPWZspnC+IHWICBJUfvyQ==",
+      "type": "package",
+      "path": "itext7.bouncy-castle-adapter/9.3.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "ITSC-avatar.png",
+        "LICENSE.md",
+        "gnu-agpl-v3.0.md",
+        "itext7.bouncy-castle-adapter.9.3.0.nupkg.sha512",
+        "itext7.bouncy-castle-adapter.nuspec"
       ]
     },
     "MailKit/4.14.1": {
@@ -9384,7 +9437,8 @@
       "Npgsql >= 9.0.4",
       "Npgsql.EntityFrameworkCore.PostgreSQL >= 9.0.4",
       "Swashbuckle.AspNetCore >= 6.6.2",
-      "iText7 >= 9.3.0"
+      "iText7 >= 9.3.0",
+      "itext7.bouncy-castle-adapter >= 9.3.0"
     ]
   },
   "packageFolders": {
@@ -9486,6 +9540,10 @@
             "version": "[6.6.2, )"
           },
           "iText7": {
+            "target": "Package",
+            "version": "[9.3.0, )"
+          },
+          "itext7.bouncy-castle-adapter": {
             "target": "Package",
             "version": "[9.3.0, )"
           }

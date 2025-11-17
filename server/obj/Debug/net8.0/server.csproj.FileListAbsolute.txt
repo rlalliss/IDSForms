@@ -226,3 +226,4 @@ D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server\obj\Debug\net8.0
 D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server\obj\Debug\net8.0\server.pdb
 D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server\obj\Debug\net8.0\server.genruntimeconfig.cache
 D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server\obj\Debug\net8.0\ref\server.dll
+D:\Dropbox\Ricks Documents\Business\Development\IDSForms\server\bin\Debug\net8.0\itext.bouncy-castle-adapter.dll

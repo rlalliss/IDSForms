@@ -19,7 +19,8 @@
           "Npgsql": "9.0.4",
           "Npgsql.EntityFrameworkCore.PostgreSQL": "9.0.4",
           "Swashbuckle.AspNetCore": "6.6.2",
-          "itext7": "9.3.0"
+          "itext7": "9.3.0",
+          "itext7.bouncy-castle-adapter": "9.3.0"
         },
         "runtime": {
           "server.dll": {}
@@ -33,11 +34,11 @@
           }
         }
       },
-      "BouncyCastle.Cryptography/2.6.1": {
+      "BouncyCastle.Cryptography/2.6.2": {
         "runtime": {
           "lib/net6.0/BouncyCastle.Cryptography.dll": {
             "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.6.1.59591"
+            "fileVersion": "2.6.2.46322"
           }
         }
       },
@@ -128,6 +129,18 @@
           }
         }
       },
+      "itext.bouncy-castle-adapter/9.3.0": {
+        "dependencies": {
+          "BouncyCastle.Cryptography": "2.6.2",
+          "itext.commons": "9.3.0"
+        },
+        "runtime": {
+          "lib/netstandard2.0/itext.bouncy-castle-adapter.dll": {
+            "assemblyVersion": "9.3.0.0",
+            "fileVersion": "9.3.0.0"
+          }
+        }
+      },
       "itext.commons/9.3.0": {
         "dependencies": {
           "Microsoft.Extensions.Logging": "9.0.10",
@@ -143,6 +156,11 @@
       "itext7/9.3.0": {
         "dependencies": {
           "itext": "9.3.0"
+        }
+      },
+      "itext7.bouncy-castle-adapter/9.3.0": {
+        "dependencies": {
+          "itext.bouncy-castle-adapter": "9.3.0"
         }
       },
       "MailKit/4.14.1": {
@@ -1005,7 +1023,7 @@
       },
       "MimeKit/4.14.0": {
         "dependencies": {
-          "BouncyCastle.Cryptography": "2.6.1",
+          "BouncyCastle.Cryptography": "2.6.2",
           "System.Security.Cryptography.Pkcs": "8.0.1"
         },
         "runtime": {
@@ -1790,12 +1808,12 @@
       "path": "bcrypt.net-next/4.0.3",
       "hashPath": "bcrypt.net-next.4.0.3.nupkg.sha512"
     },
-    "BouncyCastle.Cryptography/2.6.1": {
+    "BouncyCastle.Cryptography/2.6.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-vZsG2YILhthgRqO+ZVgRff4ZFKKTl0v7kqaVBLCtRvpREhfBP33pcWrdA3PRYgWuFL1RxiUFvjMUHTdBZlJcoA==",
-      "path": "bouncycastle.cryptography/2.6.1",
-      "hashPath": "bouncycastle.cryptography.2.6.1.nupkg.sha512"
+      "sha512": "sha512-7oWOcvnntmMKNzDLsdxAYqApt+AjpRpP2CShjMfIa3umZ42UQMvH0tl1qAliYPNYO6vTdcGMqnRrCPmsfzTI1w==",
+      "path": "bouncycastle.cryptography/2.6.2",
+      "hashPath": "bouncycastle.cryptography.2.6.2.nupkg.sha512"
     },
     "EFCore.NamingConventions/9.0.0": {
       "type": "package",
@@ -1818,6 +1836,13 @@
       "path": "itext/9.3.0",
       "hashPath": "itext.9.3.0.nupkg.sha512"
     },
+    "itext.bouncy-castle-adapter/9.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-C7q8wbwDyc2npzKBRF46KnueJON6in3QEdPlsz7VvXDqClRF1C0VfE6HwVCpJJ5Q5qADNSYNbtXFZgD7T1/51g==",
+      "path": "itext.bouncy-castle-adapter/9.3.0",
+      "hashPath": "itext.bouncy-castle-adapter.9.3.0.nupkg.sha512"
+    },
     "itext.commons/9.3.0": {
       "type": "package",
       "serviceable": true,
@@ -1831,6 +1856,13 @@
       "sha512": "sha512-rO7ShRLngeoH+1PtiI94DzzLPVusdBbbStspdk7hkxIy0ppdgU+xctQUQHr2o1N3feT6kVXLTJ57WcuvNPwk2Q==",
       "path": "itext7/9.3.0",
       "hashPath": "itext7.9.3.0.nupkg.sha512"
+    },
+    "itext7.bouncy-castle-adapter/9.3.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-B8I9+xX+96T1+CTKeXq0UlWSMQcGigUkzqaQSXJT6RmfkK1zTVxDJDw5RdmwziY4xdPWZspnC+IHWICBJUfvyQ==",
+      "path": "itext7.bouncy-castle-adapter/9.3.0",
+      "hashPath": "itext7.bouncy-castle-adapter.9.3.0.nupkg.sha512"
     },
     "MailKit/4.14.1": {
       "type": "package",

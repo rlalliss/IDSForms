@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
+import AppShell from '../components/AppShell';
 
 const apiBase = api.defaults.baseURL?.replace(/\/$/, '') ?? '';
 
@@ -35,67 +36,86 @@ export default function Forms() {
   }, []);
 
   return (
-    <div style={{ maxWidth: 900, margin: '0 auto', padding: 16 }}>
-      <h2>Forms</h2>
+    <AppShell
+      title="Forms catalog"
+      subtitle="Browse, fill, and send the latest templates."
+      breadcrumbs={[{ label: 'Workspace' }, { label: 'Forms' }]}
+      actions={
+        <button className="btn btn--primary" onClick={() => nav('/fill')}>
+          Start submission
+        </button>
+      }
+    >
+      <section className="panel">
+        <div className="forms-controls">
+          <div className="form-field">
+            <label>Search</label>
+            <input
+              className="input-control"
+              placeholder="Search forms…"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && search()}
+            />
+          </div>
+          <button className="btn btn--primary" onClick={search} disabled={loading}>
+            {loading ? 'Searching…' : 'Search'}
+          </button>
+          <div className="form-field">
+            <label>Jump to sign</label>
+            <input
+              className="input-control"
+              placeholder="Enter slug to sign…"
+              value={slug}
+              onChange={(e) => setSlug(e.target.value)}
+            />
+          </div>
+          <button className="btn btn--outline" onClick={() => slug && nav(`/sign/${encodeURIComponent(slug)}`)} disabled={!slug}>
+            Go sign
+          </button>
+        </div>
+        {error && <p className="error-text">{error}</p>}
+      </section>
 
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <input
-          placeholder="Search forms…"
-          value={q}
-          onChange={(e) => setQ(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && search()}
-          style={{ minWidth: 250 }}
-        />
-        <button onClick={search} disabled={loading}>Search</button>
-        <span style={{ marginLeft: 'auto' }} />
-        <input
-          placeholder="Enter slug to sign…"
-          value={slug}
-          onChange={(e) => setSlug(e.target.value)}
-          style={{ minWidth: 220 }}
-        />
-        <button onClick={() => slug && nav(`/sign/${encodeURIComponent(slug)}`)} disabled={!slug}>Go Sign</button>
-      </div>
-
-      {error && <p style={{ color: 'crimson' }}>{error}</p>}
-      {loading && <p>Loading…</p>}
-
-      <div style={{ marginTop: 16 }}>
+      <section className="panel" style={{ padding: 0 }}>
         {items.length === 0 && !loading ? (
-          <p>No forms found.</p>
+          <div className="empty-state">No forms found.</div>
         ) : (
-          <div className="overflow-hidden rounded-xl border">
-            <table className="min-w-full divide-y divide-gray-200 text-sm">
-              <thead className="bg-gray-50">
+          <div className="table-wrapper">
+            <table className="table">
+              <thead>
                 <tr>
-                  <th className="px-4 py-2 text-left font-medium text-gray-600">Title</th>
-                  <th className="px-4 py-2 text-left font-medium text-gray-600">Slug</th>
-                  <th className="px-4 py-2 text-left font-medium text-gray-600">Category</th>
-                  <th className="px-4 py-2 text-left font-medium text-gray-600">Description</th>
-                  <th className="px-4 py-2 text-left font-medium text-gray-600">Actions</th>
+                  <th>Title</th>
+                  <th>Slug</th>
+                  <th>Category</th>
+                  <th>Description</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-100 bg-white">
+              <tbody>
                 {items.map((f) => (
-                  <tr key={f.slug} className="hover:bg-gray-50">
-                    <td className="px-4 py-2">{f.title}</td>
-                    <td className="px-4 py-2 text-gray-600">{f.slug}</td>
-                    <td className="px-4 py-2 text-gray-600">{f.category || '-'}</td>
-                    <td className="px-4 py-2 text-gray-600">{f.description || '-'}</td>
-                    <td className="px-4 py-2 space-x-3">
-                      <button className="text-blue-600 hover:underline" onClick={() => nav(`/fill/${encodeURIComponent(f.slug)}`)}>
-                        Fill
-                      </button>
-                      <button className="text-blue-600 hover:underline" onClick={() => nav(`/sign/${encodeURIComponent(f.slug)}`)}>
-                        Sign
-                      </button>
-                      <a
-                        className="text-blue-600 hover:underline"
-                        href={`${apiBase}/forms/${encodeURIComponent(f.slug)}/pdf`}
-                        target="_blank" rel="noreferrer"
-                      >
-                        Preview
-                      </a>
+                  <tr key={f.slug}>
+                    <td style={{ fontWeight: 600 }}>{f.title}</td>
+                    <td>{f.slug}</td>
+                    <td>{f.category || '-'}</td>
+                    <td>{f.description || '-'}</td>
+                    <td>
+                      <div className="form-actions">
+                        <button onClick={() => nav(`/fill/${encodeURIComponent(f.slug)}`)} className="link-action">
+                          Fill
+                        </button>
+                        <button onClick={() => nav(`/sign/${encodeURIComponent(f.slug)}`)} className="link-action">
+                          Sign
+                        </button>
+                        <a
+                          className="link-action"
+                          href={`${apiBase}/forms/${encodeURIComponent(f.slug)}/pdf`}
+                          target="_blank"
+                          rel="noreferrer"
+                        >
+                          Preview
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 ))}
@@ -103,7 +123,7 @@ export default function Forms() {
             </table>
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </AppShell>
   );
 }
