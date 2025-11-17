@@ -1,12 +1,19 @@
 {
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": [
+      "/api/*",
+      "/assets/*",
+      "/favicon.ico",
+      "/robots.txt"
+    ]
+  },
   "routes": [
     {
       "route": "/api/*",
-      "allowedRoles": ["anonymous"]
-    },
-    {
-      "route": "/*",
-      "rewrite": "/index.html"
+      "allowedRoles": [
+        "anonymous"
+      ]
     }
   ]
 }
