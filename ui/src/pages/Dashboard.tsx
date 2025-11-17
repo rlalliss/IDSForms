@@ -1,5 +1,6 @@
 import * as React from "react";
 import { JSX } from "react";
+import { Link, useNavigate } from "react-router-dom";
 
 type Stat = {
   label: string;
@@ -42,6 +43,7 @@ function Badge({ status }: { status: Activity["status"] }) {
 }
 
 export default function Dashboard(): JSX.Element {
+  const navigate = useNavigate();
   // Placeholder data — replace with real API calls
   const [stats] = React.useState<Stat[]>([
     { label: "Forms Available", value: 30 },
@@ -78,19 +80,19 @@ export default function Dashboard(): JSX.Element {
             <div className="flex gap-2">
               <button
                 className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-gray-50 active:translate-y-[1px]"
-                onClick={() => (window.location.href = "/fill")}
+                onClick={() => navigate("/fill")}
               >
                 New Submission
               </button>
               <button
                 className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-gray-50 active:translate-y-[1px]"
-                onClick={() => (window.location.href = "/forms")}
+                onClick={() => navigate("/forms")}
               >
                 Open Forms Catalog
               </button>
               <button
                 className="rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm font-medium shadow-sm hover:bg-gray-50 active:translate-y-[1px]"
-                onClick={() => (window.location.href = "/settings")}
+                onClick={() => navigate("/settings")}
               >
                 Manage Defaults
               </button>
@@ -114,9 +116,9 @@ export default function Dashboard(): JSX.Element {
           <section className="lg:col-span-2 rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-base font-semibold">Recent Activity</h2>
-              <a className="text-sm text-blue-600 hover:underline" href="/submissions">
+              <Link className="text-sm text-blue-600 hover:underline" to="/submissions">
                 View all
-              </a>
+              </Link>
             </div>
 
             <div className="overflow-hidden rounded-xl border">
@@ -152,29 +154,29 @@ export default function Dashboard(): JSX.Element {
             <h2 className="mb-3 text-base font-semibold">Shortcuts</h2>
             <ul className="space-y-2 text-sm">
               <li>
-                <a className="text-blue-600 hover:underline" href="/forms">
+                <Link className="text-blue-600 hover:underline" to="/forms">
                   Fill a form
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="text-blue-600 hover:underline" href="/fill">
+                <Link className="text-blue-600 hover:underline" to="/fill">
                   Start new submission
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="text-blue-600 hover:underline" href="/submissions">
+                <Link className="text-blue-600 hover:underline" to="/submissions">
                   Submission history
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="text-blue-600 hover:underline" href="/settings">
+                <Link className="text-blue-600 hover:underline" to="/settings">
                   User defaults
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="text-blue-600 hover:underline" href="/sign">
+                <Link className="text-blue-600 hover:underline" to="/sign">
                   Sign a form
-                </a>
+                </Link>
               </li>
             </ul>
 
