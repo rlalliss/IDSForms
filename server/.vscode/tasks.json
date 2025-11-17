@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "publish-release",
+      "type": "process",
+      "command": "dotnet",
+      "args": [
+        "publish",
+        "${workspaceFolder}/server.csproj",
+        "-c",
+        "Release",
+        "-o",
+        "${workspaceFolder}/bin/Release/net8.0/publish"
+      ],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

@@ -86,8 +86,8 @@ var log = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("Startu
 log.LogInformation("Starting IDSForms application");
 log.LogInformation("Using DB host {Host}", new NpgsqlConnectionStringBuilder(conn).Host);
 
-// var spaDistPath = Path.GetFullPath(
-//     Path.Combine(builder.Environment.ContentRootPath, "..", "ui", "dist"));
+var spaDistPath = Path.GetFullPath(
+    Path.Combine(builder.Environment.ContentRootPath, "..", "ui", "dist"));
 
 // Configure the HTTP request pipeline.
 // if (app.Environment.IsDevelopment())
@@ -131,25 +131,25 @@ app.UseCors("AllowStaticWebApp");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// if (Directory.Exists(spaDistPath))
-// {
-//     var spaFileProvider = new PhysicalFileProvider(spaDistPath);
-//     app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = spaFileProvider });
-//     app.UseStaticFiles(new StaticFileOptions { FileProvider = spaFileProvider });
-//}
-app.MapGet("/debug/ping", () => Results.Ok("pong"));
+if (Directory.Exists(spaDistPath))
+{
+    var spaFileProvider = new PhysicalFileProvider(spaDistPath);
+    app.UseDefaultFiles(new DefaultFilesOptions { FileProvider = spaFileProvider });
+    app.UseStaticFiles(new StaticFileOptions { FileProvider = spaFileProvider });
+}
+//app.MapGet("/debug/ping", () => Results.Ok("pong"));
 
 app.MapControllers();
 
-// if (Directory.Exists(spaDistPath))
-// {
-//     app.MapFallback(async ctx =>
-//     {
-//         ctx.Response.ContentType = "text/html";
-//         await ctx.Response.SendFileAsync(Path.Combine(spaDistPath, "index.html"));
-//     });
-// }
+if (Directory.Exists(spaDistPath))
+{
+    app.MapFallback(async ctx =>
+    {
+        ctx.Response.ContentType = "text/html";
+        await ctx.Response.SendFileAsync(Path.Combine(spaDistPath, "index.html"));
+    });
+}
 
-// app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 
 app.Run();
