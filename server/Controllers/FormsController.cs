@@ -28,14 +28,22 @@ public sealed class FormsController : ControllerBase
         return Ok(list);
     }
 
+    public sealed record PrefillReq(Dictionary<string, string>? Customer = null);
+
     [Authorize, HttpGet("{slug}/prefill")]
-    public async Task<IActionResult> Prefill(string slug)
+    public Task<IActionResult> Prefill(string slug) => PrefillInternal(slug, null);
+
+    [Authorize, HttpPost("{slug}/prefill")]
+    public Task<IActionResult> PrefillWithCustomer(string slug, [FromBody] PrefillReq? req)
+        => PrefillInternal(slug, req?.Customer);
+
+    private async Task<IActionResult> PrefillInternal(string slug, Dictionary<string, string>? customer)
     {
         var form = await _db.Forms.FirstOrDefaultAsync(f => f.Slug == slug && f.IsActive);
         if (form is null) return NotFound();
         var uid = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        var prefill = await BuildPrefillAsync(uid, form);
+        var prefill = await BuildPrefillAsync(uid, form, customer);
         return Ok(prefill);
     }
 
@@ -72,7 +80,7 @@ public sealed class FormsController : ControllerBase
         return File(bytes, "application/pdf", enableRangeProcessing: true);
     }
 
-    public sealed record PreviewReq(Dictionary<string, string> Values);
+    public sealed record PreviewReq(Dictionary<string, string> Values, Dictionary<string, string>? Customer = null);
 
     [Authorize]
     [HttpPost("{slug}/preview")]
@@ -82,7 +90,7 @@ public sealed class FormsController : ControllerBase
         if (form is null) return NotFound();
 
         var uid = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-        var values = await BuildPrefillAsync(uid, form);
+        var values = await BuildPrefillAsync(uid, form, req.Customer);
         foreach (var kv in req.Values) values[kv.Key] = kv.Value; // user overrides
 
         // Create a filled temp file
@@ -97,7 +105,8 @@ public sealed class FormsController : ControllerBase
         bool Flatten = false,
         string? ToOverride = null,
         string? CcOverride = null,
-        string? BccOverride = null
+        string? BccOverride = null,
+        Dictionary<string, string>? Customer = null
     );
 
     // Signing workflow
@@ -106,7 +115,8 @@ public sealed class FormsController : ControllerBase
         bool Flatten = true,
         string? ToOverride = null,
         string? CcOverride = null,
-        string? BccOverride = null
+        string? BccOverride = null,
+        Dictionary<string, string>? Customer = null
     );
 
     public sealed record CaptureSignatureReq(
@@ -155,7 +165,7 @@ public sealed class FormsController : ControllerBase
         if (form is null) return NotFound();
         var uid = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        var values = await BuildPrefillAsync(uid, form);
+        var values = await BuildPrefillAsync(uid, form, req.Customer);
         foreach (var kv in req.Values) values[kv.Key] = kv.Value;
 
         // (Optional) validate requireds from FormFields here
@@ -203,7 +213,7 @@ public sealed class FormsController : ControllerBase
         if (form is null) return NotFound();
         var uid = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
-        var values = await BuildPrefillAsync(uid, form);
+        var values = await BuildPrefillAsync(uid, form, req.Customer);
         foreach (var kv in req.Values) values[kv.Key] = kv.Value;
 
         var tpath = await _storage.GetLocalPathAsync(form.PdfBlobPath, HttpContext.RequestAborted);
@@ -371,12 +381,14 @@ public sealed class FormsController : ControllerBase
         return new { items = rows };
     }
 
-    private async Task<Dictionary<string, string>> BuildPrefillAsync(Guid userId, Form form)
+    private async Task<Dictionary<string, string>> BuildPrefillAsync(Guid userId, Form form, Dictionary<string, string>? customerFields = null)
     {
         var result = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
-        // Form defaults
-        var fd = await _db.FormDefaults.Where(x => x.FormId == form.Id).ToDictionaryAsync(x => x.FieldName, x => x.FieldValue);
+        // Form defaults (scoped to user + form)
+        var fd = await _db.FormDefaults
+            .Where(x => x.FormId == form.Id && x.UserId == userId)
+            .ToDictionaryAsync(x => x.FieldName, x => x.FieldValue);
         foreach (var kv in fd) result[kv.Key] = kv.Value ?? "";
 
         // Profile mapping (adjust to your field names)
@@ -398,6 +410,16 @@ public sealed class FormsController : ControllerBase
         var uf = await _db.UserDefaults.Where(x => x.UserId == userId && x.FormSlug == form.Slug)
           .ToDictionaryAsync(x => x.FieldName, x => x.FieldValue);
         foreach (var kv in uf) result[kv.Key] = kv.Value ?? "";
+
+        // Customer overrides (from UI quick customer panel)
+        if (customerFields is not null)
+        {
+            foreach (var kv in customerFields)
+            {
+                if (string.IsNullOrWhiteSpace(kv.Key)) continue;
+                result[kv.Key] = kv.Value ?? "";
+            }
+        }
 
         //var signedPath = Path.Combine(outDir, "filled_signed.pdf");
         //_signature.StampSignaturePngIntoField(pdfPath, signedPath, "CustomerSignature", req.CustomerSignatureDataUrl);

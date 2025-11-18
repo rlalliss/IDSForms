@@ -2,31 +2,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../api';
 import AppShell from '../components/AppShell';
+import { readCustomerDraft, writeCustomerDraft } from '../customerStorage';
+import type { CustomerDraft } from '../customerStorage';
 
 const apiBase = api.defaults.baseURL?.replace(/\/$/, '') ?? '';
 
 type FormItem = { slug: string; title: string; category?: string | null; description?: string | null };
-type CustomerDraft = {
-  name: string;
-  email: string;
-  homePhone: string;
-  workPhone: string;
-  street: string;
-  city: string;
-  state: string;
-  zip: string;
-};
-
-const defaultCustomer: CustomerDraft = {
-  name: '',
-  email: '',
-  homePhone: '',
-  workPhone: '',
-  street: '',
-  city: '',
-  state: '',
-  zip: ''
-};
 
 export default function Forms() {
   const nav = useNavigate();
@@ -35,15 +16,7 @@ export default function Forms() {
   const [error, setError] = useState('');
   const [items, setItems] = useState<FormItem[]>([]);
   const [slug, setSlug] = useState('');
-  const [customer, setCustomer] = useState<CustomerDraft>(() => {
-    if (typeof window === 'undefined') return defaultCustomer;
-    try {
-      const raw = window.localStorage.getItem('idsforms.customer');
-      return raw ? { ...defaultCustomer, ...JSON.parse(raw) } : defaultCustomer;
-    } catch {
-      return defaultCustomer;
-    }
-  });
+  const [customer, setCustomer] = useState<CustomerDraft>(() => readCustomerDraft());
   const [saveMessage, setSaveMessage] = useState('');
 
   function handleCustomerChange(field: keyof CustomerDraft, value: string) {
@@ -53,9 +26,7 @@ export default function Forms() {
   function handleCustomerSave(e: React.FormEvent) {
     e.preventDefault();
     try {
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('idsforms.customer', JSON.stringify(customer));
-      }
+      writeCustomerDraft(customer);
       setSaveMessage('Customer details saved for this session.');
       setTimeout(() => setSaveMessage(''), 3500);
     } catch {
@@ -95,8 +66,8 @@ export default function Forms() {
               <input
                 id="cust-name"
                 className="input-control"
-                value={customer.name}
-                onChange={(e) => handleCustomerChange('name', e.target.value)}
+                value={customer.CustomerName}
+                onChange={(e) => handleCustomerChange('CustomerName', e.target.value)}
                 placeholder="Ava Thompson"
               />
             </div>
@@ -106,8 +77,8 @@ export default function Forms() {
                 id="cust-email"
                 className="input-control"
                 type="email"
-                value={customer.email}
-                onChange={(e) => handleCustomerChange('email', e.target.value)}
+                value={customer.CustomerEmail}
+                onChange={(e) => handleCustomerChange('CustomerEmail', e.target.value)}
                 placeholder="ava@example.com"
               />
             </div>
@@ -117,8 +88,8 @@ export default function Forms() {
                 id="cust-home"
                 className="input-control"
                 type="tel"
-                value={customer.homePhone}
-                onChange={(e) => handleCustomerChange('homePhone', e.target.value)}
+                value={customer.CustomerHomePhone}
+                onChange={(e) => handleCustomerChange('CustomerHomePhone', e.target.value)}
                 placeholder="555-123-9876"
               />
             </div>
@@ -128,8 +99,8 @@ export default function Forms() {
                 id="cust-work"
                 className="input-control"
                 type="tel"
-                value={customer.workPhone}
-                onChange={(e) => handleCustomerChange('workPhone', e.target.value)}
+                value={customer.CustomerWorkPhone}
+                onChange={(e) => handleCustomerChange('CustomerWorkPhone', e.target.value)}
                 placeholder="555-987-6543"
               />
             </div>
@@ -140,8 +111,8 @@ export default function Forms() {
               <input
                 id="cust-street"
                 className="input-control"
-                value={customer.street}
-                onChange={(e) => handleCustomerChange('street', e.target.value)}
+                value={customer.CustomerStreet}
+                onChange={(e) => handleCustomerChange('CustomerStreet', e.target.value)}
                 placeholder="123 Main St"
               />
             </div>
@@ -150,8 +121,8 @@ export default function Forms() {
               <input
                 id="cust-city"
                 className="input-control"
-                value={customer.city}
-                onChange={(e) => handleCustomerChange('city', e.target.value)}
+                value={customer.CustomerCity}
+                onChange={(e) => handleCustomerChange('CustomerCity', e.target.value)}
                 placeholder="Anytown"
               />
             </div>
@@ -160,8 +131,8 @@ export default function Forms() {
               <input
                 id="cust-state"
                 className="input-control"
-                value={customer.state}
-                onChange={(e) => handleCustomerChange('state', e.target.value)}
+                value={customer.CustomerState}
+                onChange={(e) => handleCustomerChange('CustomerState', e.target.value)}
                 placeholder="CA"
               />
             </div>
@@ -170,8 +141,8 @@ export default function Forms() {
               <input
                 id="cust-zip"
                 className="input-control"
-                value={customer.zip}
-                onChange={(e) => handleCustomerChange('zip', e.target.value)}
+                value={customer.CustomerZip}
+                onChange={(e) => handleCustomerChange('CustomerZip', e.target.value)}
                 placeholder="90001"
               />
             </div>

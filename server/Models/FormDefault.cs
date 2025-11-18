@@ -3,13 +3,22 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 /// <summary>
-/// Stores system-wide default field values for a given form.
-/// These defaults are applied first, and can be overridden by user-specific defaults.
+/// Stores default field values for a given user + form combination.
+/// These defaults are applied first, and can be overridden by more specific defaults if needed.
 /// </summary>
 public sealed class FormDefault
 {
     [Key]
     public Guid Id { get; set; }
+
+    /// <summary>
+    /// The user this default value belongs to.
+    /// </summary>
+    [Required]
+    public Guid UserId { get; set; }
+
+    [ForeignKey(nameof(UserId))]
+    public User User { get; set; } = default!;
 
     /// <summary>
     /// The form this default belongs to.

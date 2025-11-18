@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams } from "react-router-dom";
 import { api } from "../api";
+import { customerToPrefillPayload, readCustomerDraft } from "../customerStorage";
 
 type Field = { pdfFieldName:string; label:string; type:string; required:boolean; orderIndex:number; };
 type Meta = { slug:string; title:string; fields:Field[]; };
@@ -12,15 +13,19 @@ export default function FormFill() {
   const [to, setTo]   = useState("");
   const [cc, setCc]   = useState("");
   const [bcc, setBcc] = useState("");
+  const customerOverrides = useMemo(() => {
+    const payload = customerToPrefillPayload(readCustomerDraft());
+    return Object.keys(payload).length ? payload : undefined;
+  }, []);
 
   useEffect(() => {
     (async () => {
       const m = await api.get(`/forms/${slug}`);
       setMeta(m.data);
-      const p = await api.get(`/forms/${slug}/prefill`);
+      const p = await api.post(`/forms/${slug}/prefill`, customerOverrides ? { customer: customerOverrides } : {});
       setValues(p.data);
     })();
-  }, [slug]);
+  }, [slug, customerOverrides]);
 
   const setVal = (k:string, v:string) => setValues(prev => ({...prev, [k]: v}));
 
@@ -29,7 +34,8 @@ export default function FormFill() {
       values, flatten:false,
       toOverride: to || null,
       ccOverride: cc || null,
-      bccOverride: bcc || null
+      bccOverride: bcc || null,
+      customer: customerOverrides
     });
     alert("Sent!");
   };
@@ -42,7 +48,7 @@ export default function FormFill() {
 
   // PREVIEW filled
   const previewFilled = async () => {
-    const res = await api.post(`/forms/${slug}/preview`, { values }, { responseType: "blob" });
+    const res = await api.post(`/forms/${slug}/preview`, { values, customer: customerOverrides }, { responseType: "blob" });
     const url = URL.createObjectURL(res.data);
     window.open(url, "_blank");
   };

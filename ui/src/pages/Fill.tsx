@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
+import { customerToPrefillPayload, readCustomerDraft } from '../customerStorage';
 
 type FieldMeta = { pdfFieldName: string; label: string; type: string; required: boolean; orderIndex: number };
 type MetaResp = { slug: string; title: string; pdfBlobPath: string; fields: FieldMeta[] };
@@ -17,6 +18,10 @@ export default function Fill() {
   const [bccOverride, setBccOverride] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const customerOverrides = useMemo(() => {
+    const payload = customerToPrefillPayload(readCustomerDraft());
+    return Object.keys(payload).length ? payload : undefined;
+  }, []);
 
   async function load() {
     if (!slug) return;
@@ -24,7 +29,10 @@ export default function Fill() {
     try {
       const [metaRes, prefillRes] = await Promise.all([
         api.get<MetaResp>(`/forms/${encodeURIComponent(slug)}`),
-        api.get<Record<string, string>>(`/forms/${encodeURIComponent(slug)}/prefill`)
+        api.post<Record<string, string>>(
+          `/forms/${encodeURIComponent(slug)}/prefill`,
+          customerOverrides ? { customer: customerOverrides } : {}
+        )
       ]);
       setMeta(metaRes.data);
       setValues(prefillRes.data);
@@ -41,7 +49,11 @@ export default function Fill() {
     if (!slug) return;
     setLoading(true); setError('');
     try {
-      const res = await api.post(`/forms/${encodeURIComponent(slug)}/preview`, { values }, { responseType: 'blob' });
+      const res = await api.post(
+        `/forms/${encodeURIComponent(slug)}/preview`,
+        { values, customer: customerOverrides },
+        { responseType: 'blob' }
+      );
       const blob = res.data as Blob;
       const url = URL.createObjectURL(blob);
       window.open(url, '_blank');
@@ -58,7 +70,8 @@ export default function Fill() {
         flatten,
         toOverride,
         ccOverride,
-        bccOverride
+        bccOverride,
+        customer: customerOverrides
       });
       alert(`Submitted. Email Message Id: ${res.data?.emailMessageId || 'n/a'}`);
     } catch (e: any) { setError(e.response?.data?.message || e.message || String(e)); } finally { setLoading(false); }

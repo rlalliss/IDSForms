@@ -23,6 +23,20 @@ public sealed class PdfFillService : IPdfFillService {
     foreach (var kv in values)
       if (fields.TryGetValue(kv.Key, out var f)) { f.SetDefaultValue(new PdfString(kv.Value ?? "")); f.SetValue(kv.Value ?? ""); }
 
+    var today = DateTime.Now.ToString("MM/dd/yyyy");
+    foreach (var entry in fields)
+    {
+      if (entry.Key.Contains("date", StringComparison.OrdinalIgnoreCase))
+      {
+        var current = entry.Value.GetValueAsString();
+        if (string.IsNullOrWhiteSpace(current))
+        {
+          entry.Value.SetDefaultValue(new PdfString(today));
+          entry.Value.SetValue(today);
+        }
+      }
+    }
+
     if (flatten) form.FlattenFields();
     pdf.Close();
     return Task.FromResult(outPath);

@@ -53,11 +53,12 @@ CREATE TABLE IF NOT EXISTS form_fields (
 
 CREATE TABLE IF NOT EXISTS form_defaults (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
   form_id uuid NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
   field_name text NOT NULL,
   field_value text NULL,
   updated_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT uq_form_default UNIQUE (form_id, field_name)
+  CONSTRAINT uq_form_default UNIQUE (user_id, form_id, field_name)
 );
 
 CREATE TABLE IF NOT EXISTS user_defaults (
@@ -157,12 +158,14 @@ INSERT INTO form_fields (id, form_id, pdf_field_name, label, type, required, ord
 SELECT uuid_generate_v4(), f.id, 'CustomerSignature', 'Customer Signature', 'signature', true, 2 FROM forms f WHERE f.slug = 'sample-form'
 ON CONFLICT DO NOTHING;
 
-INSERT INTO form_defaults (id, form_id, field_name, field_value)
-SELECT uuid_generate_v4(), f.id, 'Dealership', 'ACME Motors' FROM forms f WHERE f.slug = 'sample-form'
+INSERT INTO form_defaults (id, user_id, form_id, field_name, field_value)
+SELECT uuid_generate_v4(), u.id, f.id, 'Dealership', 'ACME Motors'
+FROM forms f
+JOIN users u ON u.user_name = 'admin'
+WHERE f.slug = 'sample-form'
 ON CONFLICT DO NOTHING;
 
 INSERT INTO signature_requirements (id, form_id, name, pdf_field_name, signer_role, order_index, required)
 SELECT uuid_generate_v4(), f.id, 'Customer Signature', 'CustomerSignature', 'customer', 1, true
 FROM forms f WHERE f.slug = 'sample-form'
 ON CONFLICT DO NOTHING;
-

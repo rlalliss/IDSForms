@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import { api } from '../api';
+import { customerToPrefillPayload, readCustomerDraft } from '../customerStorage';
 
 type StatusItem = {
   id: string;
@@ -24,6 +25,10 @@ export default function Signatures() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string>('');
   const [status, setStatus] = useState<StatusResponse | null>(null);
+  const customerOverrides = useMemo(() => {
+    const payload = customerToPrefillPayload(readCustomerDraft());
+    return Object.keys(payload).length ? payload : undefined;
+  }, []);
 
   // Canvas state for signature drawing
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -67,6 +72,7 @@ export default function Signatures() {
       const res = await api.post(`/forms/${encodeURIComponent(slug)}/signing/start`, {
         values: {},
         flatten: true,
+        customer: customerOverrides
       });
       setSubmissionId(res.data.submissionId);
       setStatus(res.data.status as StatusResponse);

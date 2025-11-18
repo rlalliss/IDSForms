@@ -87,7 +87,7 @@ public class FormsControllerTests
         db.Forms.Add(form);
         db.Users.Add(new User { Id = uid, UserName = "rick", PasswordHash = "x" });
         db.UserProfiles.Add(new UserProfile { UserId = uid, FullName = "Rick D", Company = "Deckard Inc", Email = "rick@example.com" });
-        db.FormDefaults.Add(new FormDefault { Id = Guid.NewGuid(), FormId = form.Id, FieldName = "CustomerName", FieldValue = "DefaultName" });
+        db.FormDefaults.Add(new FormDefault { Id = Guid.NewGuid(), UserId = uid, FormId = form.Id, FieldName = "CustomerName", FieldValue = "DefaultName" });
         db.UserDefaults.Add(new UserDefault { Id = Guid.NewGuid(), UserId = uid, FormId = form.Id, FieldName = "CustomerName", FieldValue = "GlobalName" });
         db.UserDefaults.Add(new UserDefault { Id = Guid.NewGuid(), UserId = uid, FormId = form.Id, FieldName = "Dealer", FieldValue = "GlobalDealer" });
         // Per-form override should win
@@ -106,6 +106,36 @@ public class FormsControllerTests
         // Assert
         var ok = result.Should().BeOfType<OkObjectResult>().Subject;
         ok.Value.Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task Prefill_WithCustomerOverrides_WinsOverDefaults()
+    {
+        await using var db = TestHelpers.CreateInMemoryDb(nameof(Prefill_WithCustomerOverrides_WinsOverDefaults));
+        var uid = Guid.NewGuid();
+        var form = new Form { Id = Guid.NewGuid(), Slug = "deal", Title = "Deal", IsActive = true, PdfBlobPath = "dummy.pdf" };
+        db.Forms.Add(form);
+        db.Users.Add(new User { Id = uid, UserName = "rick", PasswordHash = "x" });
+        db.FormDefaults.Add(new FormDefault { Id = Guid.NewGuid(), UserId = uid, FormId = form.Id, FieldName = "CustomerName", FieldValue = "DefaultName" });
+        await db.SaveChangesAsync();
+
+        var sut = new FormsController(db, Mock.Of<IPdfFillService>(), Mock.Of<IEmailService>(), Mock.Of<IWebHostEnvironment>(), Mock.Of<ISignatureService>(), Mock.Of<IStorageService>())
+        {
+            ControllerContext = TestHelpers.CreateControllerContext(uid, "rick")
+        };
+
+        var customer = new Dictionary<string, string>
+        {
+            ["CustomerName"] = "Override Name",
+            ["CustomerEmail"] = "customer@example.com"
+        };
+
+        var result = await sut.PrefillWithCustomer(form.Slug, new FormsController.PrefillReq(customer));
+
+        var ok = result.Should().BeOfType<OkObjectResult>().Subject;
+        var dict = ok.Value.Should().BeAssignableTo<IDictionary<string, string>>().Subject;
+        dict["CustomerName"].Should().Be("Override Name");
+        dict["CustomerEmail"].Should().Be("customer@example.com");
     }
 
     [Fact]

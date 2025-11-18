@@ -15,7 +15,7 @@ SELECT id, 'Admin User', 'admin@example.com' FROM users WHERE user_name = 'admin
 ON CONFLICT (user_id) DO NOTHING;
 
 -- Reset admin password (safe to re-run)
-UPDATE users SET password_hash = crypt('Passw0rd!', gen_salt('bf', 11))
+UPDATE users SET password_hash = crypt('aa', gen_salt('bf', 11))
 WHERE user_name = 'admin';
 
 -- Output the admin user id for convenience
