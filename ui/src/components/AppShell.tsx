@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import logoUrl from '../assets/ids-logo.png';
+import logoUrl from '../assets/ids-logo.svg';
 
 type Breadcrumb = { label: string; to?: string };
 
@@ -9,6 +9,7 @@ interface AppShellProps {
   subtitle?: string;
   breadcrumbs?: Breadcrumb[];
   actions?: React.ReactNode;
+  heroContent?: React.ReactNode;
   children: React.ReactNode;
 }
 
@@ -24,6 +25,7 @@ export default function AppShell({
   subtitle,
   breadcrumbs,
   actions,
+  heroContent,
   children
 }: AppShellProps) {
   const location = useLocation();
@@ -32,7 +34,7 @@ export default function AppShell({
     <div className="app-shell">
       <header className="app-header">
         <div className="app-header__inner">
-          <Link to="/dashboard" className="brand">
+          <Link to="/forms" className="brand">
             <img src={logoUrl} alt="Independent Dealer Solutions" className="brand-logo" />
             <span className="brand-copy">
               IDS Forms
@@ -58,19 +60,23 @@ export default function AppShell({
 
       <main className="app-main">
         <section className="app-hero">
-          <div className="app-hero__breadcrumbs">
-            {breadcrumbs?.length
-              ? breadcrumbs.map((crumb, idx) => (
-                  <React.Fragment key={crumb.label}>
-                    {idx > 0 && <span> / </span>}
-                    {crumb.to ? <Link to={crumb.to}>{crumb.label}</Link> : <span>{crumb.label}</span>}
-                  </React.Fragment>
-                ))
-              : 'Workspace'}
-          </div>
-          <h1 className="app-hero__title">{title}</h1>
-          {subtitle && <p className="app-hero__subtitle">{subtitle}</p>}
-          {actions && <div className="app-hero__actions">{actions}</div>}
+          {heroContent ?? (
+            <>
+              <div className="app-hero__breadcrumbs">
+                {breadcrumbs?.length
+                  ? breadcrumbs.map((crumb, idx) => (
+                      <React.Fragment key={crumb.label}>
+                        {idx > 0 && <span> / </span>}
+                        {crumb.to ? <Link to={crumb.to}>{crumb.label}</Link> : <span>{crumb.label}</span>}
+                      </React.Fragment>
+                    ))
+                  : 'Workspace'}
+              </div>
+              <h1 className="app-hero__title">{title}</h1>
+              {subtitle && <p className="app-hero__subtitle">{subtitle}</p>}
+              {actions && <div className="app-hero__actions">{actions}</div>}
+            </>
+          )}
         </section>
 
         <section className="shell-content">{children}</section>

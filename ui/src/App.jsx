@@ -32,7 +32,7 @@ export default function App() {
         {/* <Route path="/" element={<Dashboard />} /> */}
         <Route
           path="/"
-          element={isAuthed ? <Navigate to="/dashboard" replace /> : <Navigate to="/login" replace />}
+          element={isAuthed ? <Navigate to="/forms" replace /> : <Navigate to="/login" replace />}
         />
         <Route path="/login" element={<Login />} />
         {/* <Route path="/dashboard" element={<Dashboard />} /> */}
@@ -40,7 +40,10 @@ export default function App() {
           path="/dashboard"
           element={isAuthed ? <Dashboard /> : <Navigate to="/login" replace />}
         />
-        <Route path="/forms" element={<Forms />} />
+        <Route
+          path="/forms"
+          element={isAuthed ? <Forms /> : <Navigate to="/login" replace />}
+        />
         <Route path="/fill" element={<Fill />} />
         <Route path="/fill/:slug" element={<Fill />} />
         <Route path="/sign" element={<Signatures />} />

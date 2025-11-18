@@ -139,7 +139,7 @@ textarea {
 
 .brand-logo {
   max-height: 48px;
-  max-width: 240px;
+  max-width: 300px;
   width: 100%;
   height: auto;
   object-fit: contain;
@@ -233,6 +233,120 @@ textarea {
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+}
+
+.forms-hero {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.forms-hero__copy {
+  flex: 1 1 320px;
+}
+
+.forms-hero--single .forms-hero__copy {
+  display: none;
+}
+
+.forms-hero--single {
+  justify-content: center;
+}
+
+.forms-hero__title {
+  font-size: clamp(2rem, 3.6vw, 2.6rem);
+  margin: 0.5rem 0 0.35rem;
+  letter-spacing: -0.02em;
+}
+
+.forms-hero__subtitle {
+  color: #475569;
+  margin: 0;
+}
+
+.forms-hero__summary {
+  margin-top: 1.5rem;
+  padding: 1.2rem 1.4rem;
+  border-radius: 20px;
+  border: 1px solid #dfe5f1;
+  background: #f8fafc;
+}
+
+.forms-hero__summary h4 {
+  margin: 0 0 0.8rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.forms-hero__summary ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.forms-hero__summary li {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+}
+
+.forms-hero__summary li span {
+  color: #94a3b8;
+}
+
+.forms-hero__form {
+  flex: 1 1 640px;
+  max-width: 780px;
+  background: #fdfdff;
+  border-radius: 24px;
+  border: 1px solid #e8edf7;
+  padding: 1.5rem;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.forms-hero__fieldset {
+  border: 1px solid #e1e6f0;
+  border-radius: 24px;
+  padding: 1.2rem 1.5rem 1.5rem;
+  margin: 0;
+}
+
+.forms-hero__fieldset legend {
+  font-size: 1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: #64748b;
+  margin-left: 1rem;
+  padding: 0 0.5rem;
+}
+
+.forms-hero__columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1rem 1.5rem;
+}
+
+.forms-hero__column {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.forms-hero__status {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  text-align: center;
+  color: #0f8a4b;
 }
 
 .panel-grid {
@@ -447,7 +561,7 @@ textarea {
 }
 
 .auth-logo {
-  width: 140px;
+  width: 300px;
   height: auto;
   filter: drop-shadow(0 20px 45px rgba(15, 23, 42, 0.25));
 }
@@ -501,4 +615,22 @@ textarea {
   border: 1px dashed #cbd5f5;
   font-size: 0.9rem;
   color: #64748b;
+}
+.password-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.password-field .input-control {
+  padding-right: 3rem;
+}
+
+.password-toggle {
+  position: absolute;
+  right: 0.6rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
 }
