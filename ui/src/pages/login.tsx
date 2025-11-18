@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../api";
-import logoUrl from "../assets/IDS-Logo.svg";//ids-logo.png";
+import logoUrl from "../assets/ids-logo.svg";//ids-logo.png";
 
 export default function Login() {
   const [userName, setUser] = useState("");
