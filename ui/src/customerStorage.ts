@@ -7,6 +7,7 @@ export type CustomerDraft = {
   CustomerCity: string;
   CustomerState: string;
   CustomerZip: string;
+  CustomerSignatureDataUrl: string;
 };
 
 export const defaultCustomer: CustomerDraft = {
@@ -17,7 +18,8 @@ export const defaultCustomer: CustomerDraft = {
   CustomerStreet: '',
   CustomerCity: '',
   CustomerState: '',
-  CustomerZip: ''
+  CustomerZip: '',
+  CustomerSignatureDataUrl: ''
 };
 
 /**
@@ -34,7 +36,8 @@ export const TEST_CUSTOMER_DATA: CustomerDraft = {
   CustomerStreet: '123 Market Street',
   CustomerCity: 'Los Angeles',
   CustomerState: 'CA',
-  CustomerZip: '90001'
+  CustomerZip: '90001',
+  CustomerSignatureDataUrl: ''
 };
 
 const STORAGE_KEY = 'idsforms.customer';
@@ -64,15 +67,18 @@ function normalizeCustomer(raw: unknown): CustomerDraft {
 }
 
 export function readCustomerDraft(): CustomerDraft {
-  if (ENABLE_CUSTOMER_TEST_DATA) {
-    return { ...defaultCustomer, ...TEST_CUSTOMER_DATA };
-  }
-  if (typeof window === 'undefined') return { ...defaultCustomer };
+  const fallback = ENABLE_CUSTOMER_TEST_DATA
+    ? { ...defaultCustomer, ...TEST_CUSTOMER_DATA }
+    : { ...defaultCustomer };
+  if (typeof window === 'undefined') return fallback;
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    return raw ? normalizeCustomer(JSON.parse(raw)) : { ...defaultCustomer };
+    if (raw) {
+      return normalizeCustomer(JSON.parse(raw));
+    }
+    return fallback;
   } catch {
-    return { ...defaultCustomer };
+    return fallback;
   }
 }
 

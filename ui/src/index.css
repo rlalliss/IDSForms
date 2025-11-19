@@ -375,6 +375,98 @@ textarea {
   flex: 1 1 220px;
 }
 
+.signature-card {
+  margin-top: 1.5rem;
+  border-radius: 22px;
+  padding: 1.2rem;
+  border: 1px dashed #cbd5f5;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.signature-card__header label {
+  display: block;
+}
+
+.signature-card__hint {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+
+.signature-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+}
+
+.signature-card__status {
+  font-size: 0.9rem;
+  color: #475569;
+}
+
+.signature-pad__canvas {
+  width: 100%;
+  height: 180px;
+  border-radius: 18px;
+  border: 1px solid #dfe5f1;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.03);
+  cursor: crosshair;
+}
+
+.forms-list-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1.5rem 2rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.forms-list-panel__header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.forms-list-panel__header p {
+  margin: 0.2rem 0 0;
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.form-description {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-description__title {
+  margin: 0;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #0f172a;
+}
+
+.form-description__meta {
+  display: flex;
+  gap: 0.6rem;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+}
+
+.form-description__text {
+  margin: 0;
+  color: #475569;
+}
+
 .form-actions {
   display: inline-flex;
   flex-wrap: wrap;

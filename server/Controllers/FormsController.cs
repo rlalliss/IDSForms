@@ -1,4 +1,6 @@
 using System.Security.Claims;
+using iText.Forms;
+using iText.Kernel.Pdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -91,11 +93,13 @@ public sealed class FormsController : ControllerBase
 
         var uid = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
         var values = await BuildPrefillAsync(uid, form, req.Customer);
+        var signatureDataUrl = values.TryGetValue("CustomerSignatureDataUrl", out var sig) ? sig : null;
         foreach (var kv in req.Values) values[kv.Key] = kv.Value; // user overrides
 
         // Create a filled temp file
         var tPath = await _storage.GetLocalPathAsync(form.PdfBlobPath, HttpContext.RequestAborted);
         var path = await _pdf.FillAsync(tPath, values, flatten: false, HttpContext.RequestAborted);
+        path = await ApplyCustomerSignatureAsync(form, path, signatureDataUrl);
         var bytes = await System.IO.File.ReadAllBytesAsync(path);
         System.IO.File.Delete(path); // temp
         return File(bytes, "application/pdf", $"preview_{slug}.pdf");
@@ -166,12 +170,14 @@ public sealed class FormsController : ControllerBase
         var uid = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
 
         var values = await BuildPrefillAsync(uid, form, req.Customer);
+        var signatureDataUrl = values.TryGetValue("CustomerSignatureDataUrl", out var sig) ? sig : null;
         foreach (var kv in req.Values) values[kv.Key] = kv.Value;
 
         // (Optional) validate requireds from FormFields here
 
         var template = await _storage.GetLocalPathAsync(form.PdfBlobPath, HttpContext.RequestAborted);
         var pdfPath = await _pdf.FillAsync(template, values, req.Flatten, HttpContext.RequestAborted);
+        pdfPath = await ApplyCustomerSignatureAsync(form, pdfPath, signatureDataUrl);
 
         var tpl = form.EmailTemplate;
         if (tpl is null)
@@ -425,6 +431,70 @@ public sealed class FormsController : ControllerBase
         //_signature.StampSignaturePngIntoField(pdfPath, signedPath, "CustomerSignature", req.CustomerSignatureDataUrl);
 
         return result;
+    }
+
+    private async Task<string> ApplyCustomerSignatureAsync(Form form, string pdfPath, string? signatureDataUrl)
+    {
+        if (string.IsNullOrWhiteSpace(signatureDataUrl)) return pdfPath;
+
+        var signatureFields = await ResolveCustomerSignatureFieldsAsync(form, pdfPath);
+
+        if (signatureFields.Count == 0) return pdfPath;
+
+        var directory = Path.GetDirectoryName(pdfPath);
+        if (string.IsNullOrWhiteSpace(directory)) directory = Path.GetTempPath();
+        var invalidChars = Path.GetInvalidFileNameChars();
+
+        string CleanSegment(string name)
+            => new string(name.Select(ch => invalidChars.Contains(ch) ? '_' : ch).ToArray());
+
+        var workingPath = pdfPath;
+        foreach (var fieldName in signatureFields)
+        {
+            var safeField = CleanSegment(fieldName);
+            var destPath = Path.Combine(directory!, $"{Path.GetFileNameWithoutExtension(pdfPath)}_{safeField}_{Guid.NewGuid():N}.pdf");
+            var stampedPath = _signature.StampSignaturePngIntoField(workingPath, destPath, fieldName, signatureDataUrl);
+            if (!string.Equals(workingPath, pdfPath, StringComparison.OrdinalIgnoreCase) && System.IO.File.Exists(workingPath))
+            {
+                System.IO.File.Delete(workingPath);
+            }
+            workingPath = stampedPath;
+        }
+
+        if (!string.Equals(workingPath, pdfPath, StringComparison.OrdinalIgnoreCase) && System.IO.File.Exists(pdfPath))
+        {
+            System.IO.File.Delete(pdfPath);
+        }
+
+        return workingPath;
+    }
+
+    private async Task<List<string>> ResolveCustomerSignatureFieldsAsync(Form form, string pdfPath)
+    {
+        var dbFields = await _db.FormFields
+            .Where(f => f.FormId == form.Id && f.PdfFieldName.Contains("CustomerSignature"))
+            .OrderBy(f => f.OrderIndex)
+            .Select(f => f.PdfFieldName)
+            .ToListAsync();
+        if (dbFields.Count > 0) return dbFields;
+
+        try
+        {
+            using var reader = new PdfReader(pdfPath);
+            using var pdfDoc = new PdfDocument(reader);
+            var acro = PdfAcroForm.GetAcroForm(pdfDoc, false);
+            if (acro is null) return new List<string>();
+            var names = acro.GetAllFormFields()
+                .Keys
+                .Where(k => k.Contains("CustomerSignature", StringComparison.OrdinalIgnoreCase))
+                .OrderBy(k => k, StringComparer.OrdinalIgnoreCase)
+                .ToList();
+            return names;
+        }
+        catch
+        {
+            return new List<string>();
+        }
     }
 
     // Path resolution handled by IStorageService

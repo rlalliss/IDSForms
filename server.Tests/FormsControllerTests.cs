@@ -243,6 +243,85 @@ public class FormsControllerTests
     }
 
     [Fact]
+    public async Task Submit_WithCustomerSignatureData_StampsPdfFields()
+    {
+        // Arrange
+        await using var db = TestHelpers.CreateInMemoryDb(nameof(Submit_WithCustomerSignatureData_StampsPdfFields));
+        var uid = Guid.NewGuid();
+        var form = new Form
+        {
+            Id = Guid.NewGuid(),
+            Slug = "sig-form",
+            Title = "Signature Form",
+            IsActive = true,
+            PdfBlobPath = "dummy.pdf",
+            EmailTemplate = new EmailTemplate { Id = Guid.NewGuid(), FormId = Guid.Empty, To = "to@ex.com", Subject = "Subj", BodyHtml = "Body" }
+        };
+        db.Forms.Add(form);
+        db.Users.Add(new User { Id = uid, UserName = "siguser", PasswordHash = "pw" });
+        db.FormFields.AddRange(
+            new FormField
+            {
+                Id = Guid.NewGuid(),
+                FormId = form.Id,
+                PdfFieldName = "CustomerSignaturePrimary",
+                Label = "Customer Signature",
+                Type = "signature",
+                OrderIndex = 1
+            },
+            new FormField
+            {
+                Id = Guid.NewGuid(),
+                FormId = form.Id,
+                PdfFieldName = "OtherCustomerSignatureField",
+                Label = "Co-signer",
+                Type = "signature",
+                OrderIndex = 2
+            }
+        );
+        await db.SaveChangesAsync();
+
+        var env = new Mock<IWebHostEnvironment>();
+        env.SetupGet(e => e.ContentRootPath).Returns(AppContext.BaseDirectory);
+
+        var pdf = new Mock<IPdfFillService>();
+        pdf.Setup(p => p.FillAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, string>>(), It.IsAny<bool>(), It.IsAny<CancellationToken>()))
+           .ReturnsAsync("/tmp/filled.pdf");
+
+        var email = new Mock<IEmailService>();
+        email.Setup(e => e.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()))
+             .ReturnsAsync("msg");
+
+        var storage = new Mock<IStorageService>();
+        storage.Setup(s => s.GetLocalPathAsync(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+               .ReturnsAsync("/tmp/template.pdf");
+
+        const string signatureData = "data:image/png;base64,abc";
+        var signature = new Mock<ISignatureService>();
+        signature
+            .Setup(s => s.StampSignaturePngIntoField(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), signatureData))
+            .Returns<string, string, string, string>((_, dest, _, __) => dest);
+
+        var sut = new FormsController(db, pdf.Object, email.Object, env.Object, signature.Object, storage.Object)
+        {
+            ControllerContext = TestHelpers.CreateControllerContext(uid, "siguser")
+        };
+
+        var req = new FormsController.SubmitReq(
+            new Dictionary<string, string>(),
+            Customer: new Dictionary<string, string> { ["CustomerSignatureDataUrl"] = signatureData }
+        );
+
+        // Act
+        var result = await sut.Submit(form.Slug, req);
+
+        // Assert
+        result.Should().BeOfType<OkObjectResult>();
+        signature.Verify(s => s.StampSignaturePngIntoField("/tmp/filled.pdf", It.IsAny<string>(), "CustomerSignaturePrimary", signatureData), Times.Once);
+        signature.Verify(s => s.StampSignaturePngIntoField(It.IsAny<string>(), It.IsAny<string>(), "OtherCustomerSignatureField", signatureData), Times.Once);
+    }
+
+    [Fact]
     public async Task GetFormFields_UsesDiscovery_AndMergesLabelsTypesRequired()
     {
         // Arrange
