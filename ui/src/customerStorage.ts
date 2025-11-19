@@ -29,8 +29,8 @@ export const defaultCustomer: CustomerDraft = {
 export const ENABLE_CUSTOMER_TEST_DATA = true;
 
 export const TEST_CUSTOMER_DATA: CustomerDraft = {
-  CustomerName: 'Ava Thompson',
-  CustomerEmail: 'ava@example.com',
+  CustomerName: 'Rick Test',
+  CustomerEmail: 'rickl@technaworks.com',
   CustomerHomePhone: '555-111-2222',
   CustomerWorkPhone: '555-333-4444',
   CustomerStreet: '123 Market Street',

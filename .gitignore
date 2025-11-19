@@ -7,6 +7,7 @@ server/bin/
 server/obj/
 server/publish/
 server/publish-test/
+server/filled/
 server.Tests/bin/
 server.Tests/obj/
 

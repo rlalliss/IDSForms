@@ -27,3 +27,8 @@ SELECT uuid_generate_v4(), u.id, f.id, 'Dealership', 'ACME Motors'
 FROM forms f
 JOIN users u ON u.user_name = 'admin'
 WHERE f.slug = 'sample-form'
+
+insert into email_templates (id, form_id, subject,body_html,"to",bcc,attach_flattened)
+SELECT uuid_generate_v4(), f.id, 'Dealership Forms', 'Here is your test drive agreement.', 'lalliss@technaworks.com', 'lalliss@technaworks.com', true
+FROM forms f
+WHERE f.slug = 'test-drive'

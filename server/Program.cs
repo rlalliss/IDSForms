@@ -3,8 +3,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 
-
 var builder = WebApplication.CreateBuilder(args);
+
+// if (builder.Environment.IsDevelopment())
+// {
+//     builder.Configuration.AddUserSecrets<Program>(optional: true, reloadOnChange: true);
+// }
+
+// var smtpPass = builder.Configuration["Smtp:Pass"];
 
 var conn = builder.Configuration.GetConnectionString("Default");
 builder.Services.AddDbContext<AppDb>(o =>

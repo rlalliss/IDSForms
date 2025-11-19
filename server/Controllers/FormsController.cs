@@ -1,7 +1,9 @@
 using System.Security.Claims;
+using System.Text.Json;
 using iText.Forms;
 using iText.Kernel.Pdf;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -113,6 +115,16 @@ public sealed class FormsController : ControllerBase
         Dictionary<string, string>? Customer = null
     );
 
+    public sealed class SubmitPdfUploadReq
+    {
+        public IFormFile? Pdf { get; set; }
+        public bool Flatten { get; set; }
+        public string? ToOverride { get; set; }
+        public string? CcOverride { get; set; }
+        public string? BccOverride { get; set; }
+        public string? Customer { get; set; }
+    }
+
     // Signing workflow
     public sealed record StartSigningReq(
         Dictionary<string, string> Values,
@@ -209,6 +221,88 @@ public sealed class FormsController : ControllerBase
         await _db.SaveChangesAsync();
 
         return Ok(new { pdf = pdfPath, emailMessageId = msgId, to, cc, bcc });
+    }
+
+    [Authorize]
+    [HttpPost("{slug}/submit-pdf")]
+    public async Task<IActionResult> SubmitPdf(string slug, [FromForm] SubmitPdfUploadReq req)
+    {
+        if (req.Pdf is null || req.Pdf.Length == 0) return BadRequest(new { error = "A completed PDF must be uploaded." });
+
+        var form = await _db.Forms.Include(f => f.EmailTemplate).FirstOrDefaultAsync(f => f.Slug == slug && f.IsActive);
+        if (form is null) return NotFound();
+
+        var uid = Guid.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+
+        Dictionary<string, string>? customerOverrides = null;
+        if (!string.IsNullOrWhiteSpace(req.Customer))
+        {
+            try
+            {
+                customerOverrides = JsonSerializer.Deserialize<Dictionary<string, string>>(req.Customer);
+            }
+            catch
+            {
+                // ignore malformed payload, treat as missing customer overrides
+            }
+        }
+
+        var values = await BuildPrefillAsync(uid, form, customerOverrides);
+
+        var uploadsDir = Path.Combine(_env.ContentRootPath, "filled");
+        Directory.CreateDirectory(uploadsDir);
+        var fileName = $"{form.Slug}_{Guid.NewGuid():N}.pdf";
+        var uploadPath = Path.Combine(uploadsDir, fileName);
+        await using (var fs = System.IO.File.Create(uploadPath))
+        {
+            await req.Pdf.CopyToAsync(fs, HttpContext.RequestAborted);
+        }
+
+        if (req.Flatten)
+        {
+            var flattened = await _pdf.FillAsync(uploadPath, new Dictionary<string, string>(), flatten: true, HttpContext.RequestAborted);
+            System.IO.File.Delete(uploadPath);
+            uploadPath = flattened;
+        }
+
+        var tpl = form.EmailTemplate;
+        if (tpl is null)
+        {
+            System.IO.File.Delete(uploadPath);
+            return BadRequest(new { error = "Form is missing an email template configuration." });
+        }
+
+        string Render(string s) => values.Aggregate(s, (acc, kv) => acc.Replace("{{" + kv.Key + "}}", kv.Value ?? ""));
+
+        var to = string.IsNullOrWhiteSpace(req.ToOverride) ? tpl.To : req.ToOverride!;
+        var cc = string.IsNullOrWhiteSpace(req.CcOverride) ? tpl.Cc ?? "" : req.CcOverride!;
+        var bcc = string.IsNullOrWhiteSpace(req.BccOverride) ? tpl.Bcc ?? "" : req.BccOverride!;
+
+        var subject = Render(tpl.Subject);
+        var body = Render(tpl.BodyHtml);
+
+        var msgId = await _email.SendAsync(to, subject, body, uploadPath);
+        if (!string.IsNullOrWhiteSpace(cc)) await _email.SendAsync(cc, "(CC) " + subject, body, null);
+        if (!string.IsNullOrWhiteSpace(bcc)) await _email.SendAsync(bcc, "(BCC) " + subject, body, null);
+
+        var payload = new
+        {
+            Mode = "uploadedPdf",
+            Email = new { req.ToOverride, req.CcOverride, req.BccOverride, req.Flatten },
+            Customer = customerOverrides
+        };
+
+        _db.Submissions.Add(new Submission
+        {
+            FormId = form.Id,
+            UserId = uid,
+            PdfPath = uploadPath,
+            PayloadJson = JsonSerializer.Serialize(payload),
+            EmailMessageId = msgId
+        });
+        await _db.SaveChangesAsync();
+
+        return Ok(new { pdf = uploadPath, emailMessageId = msgId, to, cc, bcc });
     }
 
     [Authorize]

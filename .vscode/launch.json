@@ -7,14 +7,13 @@
       "request": "launch",
       "project": "server/server.csproj",
       "launchSettingsProfile": "https",
-      "preLaunchTask": "server:watch",
-      "program": "${workspaceFolder}/server/bin/Debug/net8.0/server.dll",
       "cwd": "${workspaceFolder}/server",
-      "env": {
-        "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
-        "ASPNETCORE_ENVIRONMENT": "Development",
-        "Storage__AzureFiles__ConnectionString": "${env:IDSFORMS_AZUREFILES_CONN}"
-      },
+        "env": {
+          "ASPNETCORE_URLS": "https://localhost:5001;http://localhost:5000",
+          "ASPNETCORE_ENVIRONMENT": "Development",
+          "Smtp__Pass": "${env:Smtp__Pass}",
+          "Storage__AzureFiles__ConnectionString": "${env:IDSFORMS_AZUREFILES_CONN}"
+        },
       "console": "integratedTerminal",
       "stopAtEntry": false,
       "serverReadyAction": { "action": "none" }   // don't auto-open Swagger

@@ -1,9 +1,11 @@
+using System.IO;
 using System.Threading.Tasks;
 using Xunit;
 using FluentAssertions;
 using Moq;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using PdfApp.Api.Models;
 
@@ -319,6 +321,85 @@ public class FormsControllerTests
         result.Should().BeOfType<OkObjectResult>();
         signature.Verify(s => s.StampSignaturePngIntoField("/tmp/filled.pdf", It.IsAny<string>(), "CustomerSignaturePrimary", signatureData), Times.Once);
         signature.Verify(s => s.StampSignaturePngIntoField(It.IsAny<string>(), It.IsAny<string>(), "OtherCustomerSignatureField", signatureData), Times.Once);
+    }
+
+    [Fact]
+    public async Task SubmitPdf_NoUpload_ReturnsBadRequest()
+    {
+        await using var db = TestHelpers.CreateInMemoryDb(nameof(SubmitPdf_NoUpload_ReturnsBadRequest));
+        var uid = Guid.NewGuid();
+        db.Forms.Add(new Form
+        {
+            Id = Guid.NewGuid(),
+            Slug = "pdf",
+            Title = "PDF Form",
+            IsActive = true,
+            PdfBlobPath = "dummy.pdf",
+            EmailTemplate = new EmailTemplate { Id = Guid.NewGuid(), FormId = Guid.Empty, To = "to@ex.com", Subject = "Hi", BodyHtml = "Body" }
+        });
+        db.Users.Add(new User { Id = uid, UserName = "user", PasswordHash = "pw" });
+        await db.SaveChangesAsync();
+
+        var env = new Mock<IWebHostEnvironment>();
+        env.SetupGet(e => e.ContentRootPath).Returns(AppContext.BaseDirectory);
+
+        var sut = new FormsController(db, Mock.Of<IPdfFillService>(), Mock.Of<IEmailService>(), env.Object, Mock.Of<ISignatureService>(), Mock.Of<IStorageService>())
+        {
+            ControllerContext = TestHelpers.CreateControllerContext(uid, "user")
+        };
+
+        var result = await sut.SubmitPdf("pdf", new FormsController.SubmitPdfUploadReq());
+
+        result.Should().BeOfType<BadRequestObjectResult>();
+    }
+
+    [Fact]
+    public async Task SubmitPdf_WithUpload_SendsEmailAndSavesSubmission()
+    {
+        await using var db = TestHelpers.CreateInMemoryDb(nameof(SubmitPdf_WithUpload_SendsEmailAndSavesSubmission));
+        var uid = Guid.NewGuid();
+        var form = new Form
+        {
+            Id = Guid.NewGuid(),
+            Slug = "pdf",
+            Title = "PDF Form",
+            IsActive = true,
+            PdfBlobPath = "dummy.pdf",
+            EmailTemplate = new EmailTemplate { Id = Guid.NewGuid(), FormId = Guid.Empty, To = "to@ex.com", Subject = "Hi {{CustomerName}}", BodyHtml = "Body {{CustomerName}}" }
+        };
+        db.Forms.Add(form);
+        db.Users.Add(new User { Id = uid, UserName = "user", PasswordHash = "pw" });
+        await db.SaveChangesAsync();
+
+        var env = new Mock<IWebHostEnvironment>();
+        env.SetupGet(e => e.ContentRootPath).Returns(AppContext.BaseDirectory);
+
+        var email = new Mock<IEmailService>();
+        email.Setup(e => e.SendAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()))
+             .ReturnsAsync("msg");
+
+        var pdfFill = new Mock<IPdfFillService>();
+        pdfFill.Setup(p => p.FillAsync(It.IsAny<string>(), It.IsAny<IDictionary<string, string>>(), true, It.IsAny<CancellationToken>()))
+               .ReturnsAsync("/tmp/flattened.pdf");
+
+        var sut = new FormsController(db, pdfFill.Object, email.Object, env.Object, Mock.Of<ISignatureService>(), Mock.Of<IStorageService>())
+        {
+            ControllerContext = TestHelpers.CreateControllerContext(uid, "user")
+        };
+
+        await using var ms = new MemoryStream(new byte[] { 1, 2, 3, 4 });
+        var file = new FormFile(ms, 0, ms.Length, "pdf", "filled.pdf");
+        var req = new FormsController.SubmitPdfUploadReq
+        {
+            Pdf = file,
+            Flatten = false
+        };
+
+        var result = await sut.SubmitPdf("pdf", req);
+
+        result.Should().BeOfType<OkObjectResult>();
+        (await db.Submissions.CountAsync()).Should().Be(1);
+        email.Verify(e => e.SendAsync("to@ex.com", It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string?>()), Times.Once);
     }
 
     [Fact]
