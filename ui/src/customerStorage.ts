@@ -30,7 +30,7 @@ export const ENABLE_CUSTOMER_TEST_DATA = true;
 
 export const TEST_CUSTOMER_DATA: CustomerDraft = {
   CustomerName: 'Rick Test',
-  CustomerEmail: 'rickl@technaworks.com',
+  CustomerEmail: 'rickl@technaworks.com,lallissr@gmail.com',
   CustomerHomePhone: '555-111-2222',
   CustomerWorkPhone: '555-333-4444',
   CustomerStreet: '123 Market Street',
@@ -86,6 +86,15 @@ export function writeCustomerDraft(data: CustomerDraft): void {
   if (typeof window === 'undefined') return;
   try {
     window.localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch {
+    // ignore storage failures
+  }
+}
+
+export function clearCustomerDraft(): void {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.removeItem(STORAGE_KEY);
   } catch {
     // ignore storage failures
   }

@@ -419,6 +419,24 @@ textarea {
   cursor: crosshair;
 }
 
+.forms-hero__actions {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 0.75rem;
+}
+
+.btn--icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn--icon svg {
+  width: 16px;
+  height: 16px;
+}
+
 .forms-list-panel__header {
   display: flex;
   align-items: center;

@@ -2,8 +2,6 @@ select * from email_templates;
 select * from form_defaults;
 select * from form_fields;
 select * from forms;
-select * from signature_requirements;
-select * from submission_signatures;
 select * from submissions;
 select * from user_defaults;
 select * from user_profiles;
@@ -28,7 +26,13 @@ FROM forms f
 JOIN users u ON u.user_name = 'admin'
 WHERE f.slug = 'sample-form'
 
-insert into email_templates (id, form_id, subject,body_html,"to",bcc,attach_flattened)
-SELECT uuid_generate_v4(), f.id, 'Dealership Forms', 'Here is your test drive agreement.', 'lalliss@technaworks.com', 'lalliss@technaworks.com', true
+insert into email_templates (id, form_id, subject,body_html,bcc,attach_flattened)
+SELECT uuid_generate_v4(), f.id, 'Dealership Forms', 'Here is your test drive agreement.', 'lalliss@technaworks.com', true
 FROM forms f
 WHERE f.slug = 'test-drive'
+
+insert into email_templates (id, form_id, subject,body_html,bcc,attach_flattened)
+SELECT uuid_generate_v4(), f.id, 'Dealership Forms', 'Here is your motor vehicle contract of sale.', 'lalliss@technaworks.com', true
+FROM forms f
+WHERE f.slug = 'mvc'
+

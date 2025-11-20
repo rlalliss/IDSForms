@@ -98,30 +98,6 @@ CREATE INDEX IF NOT EXISTS idx_submissions_form ON submissions(form_id, created_
 CREATE INDEX IF NOT EXISTS idx_submissions_user ON submissions(user_id, created_at DESC);
 
 -- Signature workflow
-CREATE TABLE IF NOT EXISTS signature_requirements (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  form_id uuid NOT NULL REFERENCES forms(id) ON DELETE CASCADE,
-  name text NOT NULL,
-  pdf_field_name text NOT NULL,
-  signer_role text NOT NULL,
-  order_index int NOT NULL DEFAULT 0,
-  required boolean NOT NULL DEFAULT true
-);
-CREATE UNIQUE INDEX IF NOT EXISTS uq_sig_req_form_field ON signature_requirements(form_id, pdf_field_name);
-
-CREATE TABLE IF NOT EXISTS submission_signatures (
-  id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
-  submission_id uuid NOT NULL REFERENCES submissions(id) ON DELETE CASCADE,
-  signature_requirement_id uuid NOT NULL REFERENCES signature_requirements(id) ON DELETE CASCADE,
-  signer_user_id uuid NULL REFERENCES users(id) ON DELETE SET NULL,
-  signer_name text NULL,
-  signer_email text NULL,
-  signed_at timestamptz NULL,
-  signature_image_path text NULL,
-  source_ip text NULL,
-  CONSTRAINT uq_sub_sig UNIQUE (submission_id, signature_requirement_id)
-);
-
 -- Optional: DB storage for templates
 CREATE TABLE IF NOT EXISTS form_files (
   id uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
@@ -163,9 +139,4 @@ SELECT uuid_generate_v4(), u.id, f.id, 'Dealership', 'ACME Motors'
 FROM forms f
 JOIN users u ON u.user_name = 'admin'
 WHERE f.slug = 'sample-form'
-ON CONFLICT DO NOTHING;
-
-INSERT INTO signature_requirements (id, form_id, name, pdf_field_name, signer_role, order_index, required)
-SELECT uuid_generate_v4(), f.id, 'Customer Signature', 'CustomerSignature', 'customer', 1, true
-FROM forms f WHERE f.slug = 'sample-form'
 ON CONFLICT DO NOTHING;

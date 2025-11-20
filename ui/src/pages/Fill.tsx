@@ -18,6 +18,7 @@ export default function Fill() {
   const [ccOverride, setCcOverride] = useState('');
   const [bccOverride, setBccOverride] = useState('');
   const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null);
+  const [printing, setPrinting] = useState(false);
   const [pdfLoading, setPdfLoading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -77,7 +78,7 @@ export default function Fill() {
     setLoading(true); setError('');
     try {
       const bytes = await viewerRef.current.save();
-      const blob = new Blob([bytes], { type: 'application/pdf' });
+      const blob = toPdfBlob(bytes);
       const formData = new FormData();
       formData.append('pdf', blob, `${slug}-filled.pdf`);
       formData.append('flatten', String(flatten));
@@ -91,14 +92,60 @@ export default function Fill() {
     } catch (e: any) { setError(e.response?.data?.message || e.message || String(e)); } finally { setLoading(false); }
   }
 
+  async function printFilledPdf() {
+    if (!slug) return;
+    if (!viewerRef.current) {
+      setError('PDF is still loading. Please wait a moment and try again.');
+      return;
+    }
+    setPrinting(true);
+    setError('');
+    try {
+      const bytes = await viewerRef.current.save();
+      const blob = toPdfBlob(bytes);
+      const url = URL.createObjectURL(blob);
+
+      const frame = document.createElement('iframe');
+      frame.style.position = 'fixed';
+      frame.style.top = '0';
+      frame.style.left = '0';
+      frame.style.width = '0';
+      frame.style.height = '0';
+      frame.style.border = '0';
+      frame.src = url;
+      frame.onload = () => {
+        frame.contentWindow?.focus();
+        frame.contentWindow?.print();
+        setTimeout(() => {
+          URL.revokeObjectURL(url);
+          frame.remove();
+        }, 800);
+      };
+      document.body.appendChild(frame);
+    } catch (e: any) {
+      setError(e.response?.data?.message || e.message || String(e));
+    } finally {
+      setPrinting(false);
+    }
+  }
+
+  function toPdfBlob(bytes: Uint8Array | ArrayBuffer) {
+    const buffer = bytes instanceof ArrayBuffer
+      ? bytes.slice(0)
+      : bytes.slice().buffer; // slice() ensures we end up with a plain ArrayBuffer (not SharedArrayBuffer)
+    return new Blob([buffer], { type: 'application/pdf' });
+  }
+
   return (
     <div style={{ maxWidth: 900, margin: '0 auto', padding: 16 }}>
-      <h2>Fill Form</h2>
-      <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-        <input placeholder="Enter slug…" value={slug} onChange={(e) => setSlug(e.target.value)} style={{ minWidth: 240 }} />
-        <button onClick={load} disabled={!slug || loading}>Load</button>
-        <span style={{ marginLeft: 'auto' }} />
-        <label><input type="checkbox" checked={flatten} onChange={(e) => setFlatten(e.target.checked)} /> Flatten</label>
+      <div style={{ display: 'none' }}>
+        <h2>Fill Form</h2>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
+          <input placeholder="Enter slug…" value={slug} onChange={(e) => setSlug(e.target.value)} style={{ minWidth: 240 }} />
+          <button onClick={load} disabled={!slug || loading}>Load</button>
+          <span style={{ marginLeft: 'auto' }} />
+          <label><input type="checkbox" checked={flatten} onChange={(e) => setFlatten(e.target.checked)} /> Flatten</label>
+        </div>
       </div>
 
       {error && <p style={{ color: 'crimson' }}>{error}</p>}
@@ -106,8 +153,10 @@ export default function Fill() {
 
       {meta && (
         <div style={{ marginTop: 16 }}>
-          <h3>{meta.title}</h3>
-          <p>Customer details and saved defaults have been merged below. Use the PDF viewer to complete the form directly.</p>
+          <div style={{ display: 'none' }}>
+            <h3>{meta.title}</h3>
+            <p>Customer details and saved defaults have been merged below. Use the PDF viewer to complete the form directly.</p>
+          </div>
 
           <div className="pdf-panel">
             {pdfLoading && <p>Preparing PDF…</p>}
@@ -120,22 +169,30 @@ export default function Fill() {
           </div>
 
           <div className="pdf-actions">
-            <button onClick={() => generatePrefilledPdf(meta.slug)} disabled={pdfLoading || loading}>Regenerate Prefilled PDF</button>
-            <div className="pdf-email-controls">
-              <div>
-                <label style={{ display: 'block' }}>To Override</label>
-                <input value={toOverride} onChange={(e) => setToOverride(e.target.value)} style={{ width: '100%' }} />
-              </div>
-              <div>
-                <label style={{ display: 'block' }}>Cc Override</label>
-                <input value={ccOverride} onChange={(e) => setCcOverride(e.target.value)} style={{ width: '100%' }} />
-              </div>
-              <div>
-                <label style={{ display: 'block' }}>Bcc Override</label>
-                <input value={bccOverride} onChange={(e) => setBccOverride(e.target.value)} style={{ width: '100%' }} />
-              </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <button onClick={printFilledPdf} disabled={printing || pdfLoading || loading || !pdfData}>
+                <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M6 9V4h12v5" />
+                    <path d="M6 17h12v3H6z" />
+                    <rect x="4" y="9" width="16" height="8" rx="2" ry="2" />
+                    <path d="M8 13h8" />
+                  </svg>
+                <span>Print</span>
+                </span>
+              </button>
+              <button onClick={submit} disabled={loading || pdfLoading || !pdfData}>
+                <span style={{ display: 'inline-flex', gap: 6, alignItems: 'center' }}>
+                  <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="3" y="6" width="18" height="12" rx="2" ry="2" />
+                    <path d="m4 7 8 6 8-6" />
+                    <path d="m4 18 6-4" />
+                    <path d="m20 18-6-4" />
+                  </svg>
+                  <span>Email</span>
+                </span>
+              </button>
             </div>
-            <button onClick={submit} disabled={loading || pdfLoading || !pdfData}>Submit & Email</button>
           </div>
         </div>
       )}
